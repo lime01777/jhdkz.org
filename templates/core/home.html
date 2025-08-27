@@ -1,0 +1,330 @@
+{% extends 'base.html' %}
+
+{% block title %}Journal of Health Development - Научный журнал по вопросам развития здравоохранения{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center py-5">
+                <h1 class="display-4 mb-3">
+                    <i class="fas fa-book-medical"></i> Journal of Health Development
+                </h1>
+                <p class="lead mb-4">
+                    Научный журнал по вопросам развития здравоохранения в Казахстане и Центральной Азии
+                </p>
+                <div class="row">
+                    <div class="col-md-3">
+                        <h4>60</h4>
+                        <p>Томов</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h4>4</h4>
+                        <p>Выпусков в год</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h4>52</h4>
+                        <p>Авторов</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h4>10</h4>
+                        <p>Статей в выпуске</p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <a href="{% url 'issues:issue_list' %}" class="btn btn-light btn-lg me-3">
+                        <i class="fas fa-book"></i> Выпуски журнала
+                    </a>
+                    <a href="{% url 'users:register' %}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-user-plus"></i> Стать автором
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Текущий выпуск -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="fas fa-star"></i> Текущий выпуск
+        </h2>
+    </div>
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title">Volume 60, Number 2 (2025)</h3>
+                <p class="text-muted">
+                    <i class="fas fa-calendar"></i> Опубликован: 30.06.2025
+                </p>
+                <p class="card-text">
+                    Новый выпуск журнала содержит 9 статей по актуальным вопросам здравоохранения, 
+                    включая исследования по медико-психолого-педагогическому сопровождению детей, 
+                    анализу медико-демографических показателей сельского населения, факторам удовлетворенности 
+                    пациентов качеством медицинских услуг и другим важным темам.
+                </p>
+                <a href="{% url 'issues:issue_detail' 2025 2 %}" class="btn btn-primary">
+                    <i class="fas fa-eye"></i> Просмотреть выпуск
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-list"></i> Содержание выпуска</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <small class="text-muted">Стр. 4-12</small><br>
+                        <strong>Проблемы медико-психолого-педагогического сопровождения детей...</strong>
+                    </li>
+                    <li class="mb-2">
+                        <small class="text-muted">Стр. 13-23</small><br>
+                        <strong>Анализ медико-демографических показателей сельского населения...</strong>
+                    </li>
+                    <li class="mb-2">
+                        <small class="text-muted">Стр. 24-29</small><br>
+                        <strong>Факторы, влияющие на удовлетворенность пациентов...</strong>
+                    </li>
+                    <li class="mb-2">
+                        <small class="text-muted">Стр. 30-37</small><br>
+                        <strong>Валидация и апробация анкеты для выявления факторов риска...</strong>
+                    </li>
+                    <li class="mb-2">
+                        <small class="text-muted">Стр. 38-45</small><br>
+                        <strong>Грамотность в вопросах здоровья обучающихся...</strong>
+                    </li>
+                    <li class="mb-2">
+                        <small class="text-muted">Стр. 46-53</small><br>
+                        <strong>Ментальное здоровье студентов как приоритет...</strong>
+                    </li>
+                    <li class="mb-2">
+                        <small class="text-muted">Стр. 54-61</small><br>
+                        <strong>Удовлетворенность работодателей качеством подготовки...</strong>
+                    </li>
+                    <li class="mb-2">
+                        <small class="text-muted">Стр. 62-70</small><br>
+                        <strong>Барьеры в научной деятельности молодых учёных...</strong>
+                    </li>
+                    <li class="mb-2">
+                        <small class="text-muted">Стр. 71-76</small><br>
+                        <strong>Оценка нутриционного статуса обучающихся</strong>
+                    </li>
+                    <li class="mb-2">
+                        <small class="text-muted">Стр. 77-84</small><br>
+                        <strong>Оценка уровня заболеваемости с временной утратой...</strong>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Статистика -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="fas fa-chart-bar"></i> Статистика журнала
+        </h2>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3 class="text-primary">{{ total_articles }}</h3>
+                <p class="card-text">Опубликованных статей</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3 class="text-success">{{ total_authors }}</h3>
+                <p class="card-text">Авторов</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3 class="text-info">{{ total_views }}</h3>
+                <p class="card-text">Просмотров статей</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3 class="text-warning">{{ total_downloads }}</h3>
+                <p class="card-text">Загрузок PDF</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Последние статьи -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="fas fa-newspaper"></i> Последние статьи
+        </h2>
+    </div>
+    {% for article in latest_articles %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100 article-card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <a href="{% url 'articles:article_detail' article.pk %}" class="text-decoration-none">
+                        {{ article.get_title|truncatewords:10 }}
+                    </a>
+                </h5>
+                <p class="card-text text-muted">
+                    <i class="fas fa-users"></i> 
+                    {% for author in article.authors.all %}
+                        {{ author.get_full_name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </p>
+                <p class="card-text">
+                    {{ article.get_abstract|truncatewords:20 }}
+                </p>
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                        <i class="fas fa-calendar"></i> {{ article.created_at|date:"d.m.Y" }}
+                        <i class="fas fa-eye ms-2"></i> {{ article.views }}
+                        <i class="fas fa-download ms-2"></i> {{ article.downloads }}
+                    </small>
+                    <div class="btn-group">
+                        <a href="{% url 'articles:article_detail' article.pk %}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-eye"></i> Читать
+                        </a>
+                        {% if article.pdf_file %}
+                        <a href="{{ article.pdf_file.url }}" class="btn btn-sm btn-outline-secondary" target="_blank">
+                            <i class="fas fa-download"></i> PDF
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Последние выпуски -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="fas fa-book"></i> Последние выпуски
+        </h2>
+    </div>
+    {% for issue in latest_issues %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            {% if issue.cover_image %}
+            <img src="{{ issue.cover_image.url }}" class="card-img-top" alt="Обложка выпуска">
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ issue.get_title }}</h5>
+                <p class="card-text text-muted">
+                    <i class="fas fa-calendar"></i> {{ issue.published_at|date:"d.m.Y" }}
+                </p>
+                <p class="card-text">
+                    <i class="fas fa-file-alt"></i> {{ issue.articles.count }} статей
+                </p>
+                <a href="{% url 'issues:issue_detail' issue.year issue.number %}" class="btn btn-primary">
+                    <i class="fas fa-eye"></i> Просмотреть
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Новости -->
+{% if featured_news %}
+<div class="row mb-5">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="fas fa-bullhorn"></i> Новости журнала
+        </h2>
+    </div>
+    {% for news in featured_news %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            {% if news.image %}
+            <img src="{{ news.image.url }}" class="card-img-top" alt="{{ news.title }}">
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">
+                    <a href="{% url 'core:news_detail' news.slug %}" class="text-decoration-none">
+                        {{ news.title }}
+                    </a>
+                </h5>
+                <p class="card-text text-muted">
+                    <i class="fas fa-calendar"></i> {{ news.published_at|date:"d.m.Y" }}
+                    {% if news.is_featured %}
+                    <span class="badge bg-warning ms-2">
+                        <i class="fas fa-star"></i> Рекомендуемая
+                    </span>
+                    {% endif %}
+                </p>
+                <p class="card-text">{{ news.excerpt|truncatewords:20 }}</p>
+                <a href="{% url 'core:news_detail' news.slug %}" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-arrow-right"></i> Читать далее
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Призыв к действию -->
+<div class="row">
+    <div class="col-12">
+        <div class="card bg-light">
+            <div class="card-body text-center py-5">
+                <h3 class="mb-3">Станьте автором журнала</h3>
+                <p class="lead mb-4">
+                    Приглашаем исследователей, практикующих врачей и специалистов в области здравоохранения 
+                    к публикации своих научных работ в Journal of Health Development.
+                </p>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="text-center">
+                            <i class="fas fa-pen-fancy fa-3x text-primary mb-3"></i>
+                            <h5>Оригинальные исследования</h5>
+                            <p class="text-muted">Публикуйте результаты ваших научных исследований</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="text-center">
+                            <i class="fas fa-search fa-3x text-success mb-3"></i>
+                            <h5>Обзоры литературы</h5>
+                            <p class="text-muted">Делитесь систематическими обзорами по актуальным темам</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="text-center">
+                            <i class="fas fa-user-md fa-3x text-info mb-3"></i>
+                            <h5>Клинические случаи</h5>
+                            <p class="text-muted">Описывайте интересные клинические случаи</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <a href="{% url 'users:register' %}" class="btn btn-primary btn-lg me-3">
+                        <i class="fas fa-user-plus"></i> Зарегистрироваться как автор
+                    </a>
+                    <a href="{% url 'core:about' %}" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-info-circle"></i> Узнать больше о журнале
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ article.get_title }} - Journal of Health Development{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Главная</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'articles:article_list' %}">Статьи</a></li>
+                <li class="breadcrumb-item active">{{ article.get_title }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <!-- Основная информация о статье -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h1 class="card-title">{{ article.get_title }}</h1>
+                
+                <div class="article-meta mb-3">
+                    <p class="text-muted">
+                        <i class="fas fa-users"></i> <strong>Авторы:</strong> {{ article.authors_list }}
+                    </p>
+                    <p class="text-muted">
+                        <i class="fas fa-calendar"></i> <strong>Дата публикации:</strong> {{ article.created_at|date:"d.m.Y" }}
+                    </p>
+                    <p class="text-muted">
+                        <i class="fas fa-book"></i> <strong>Выпуск:</strong> 
+                        <a href="{% url 'issues:issue_detail' article.issue.year article.issue.number %}">
+                            {{ article.issue.get_title }}
+                        </a>
+                    </p>
+                    <p class="text-muted">
+                        <i class="fas fa-file-alt"></i> <strong>Страницы:</strong> {{ article.get_pages_info }}
+                    </p>
+                    {% if article.doi %}
+                    <p class="text-muted">
+                        <i class="fas fa-link"></i> <strong>DOI:</strong> {{ article.doi }}
+                    </p>
+                    {% endif %}
+                </div>
+                
+                <div class="d-flex gap-2 mb-4">
+                    {% if article.pdf_file %}
+                    <a href="{{ article.pdf_file.url }}" class="btn btn-primary" target="_blank">
+                        <i class="fas fa-download"></i> Скачать PDF
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'articles:article_download' article.pk %}" class="btn btn-outline-primary">
+                        <i class="fas fa-download"></i> Загрузить ({{ article.downloads }})
+                    </a>
+                    <span class="btn btn-outline-secondary disabled">
+                        <i class="fas fa-eye"></i> Просмотров: {{ article.views }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Аннотация -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 class="mb-0"><i class="fas fa-file-text"></i> Аннотация</h3>
+            </div>
+            <div class="card-body">
+                <p>{{ article.get_abstract }}</p>
+            </div>
+        </div>
+        
+        <!-- Ключевые слова -->
+        {% if article.get_keywords %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4 class="mb-0"><i class="fas fa-tags"></i> Ключевые слова</h4>
+            </div>
+            <div class="card-body">
+                <p>{{ article.get_keywords }}</p>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Похожие статьи -->
+        {% if similar_articles %}
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0"><i class="fas fa-newspaper"></i> Похожие статьи</h3>
+            </div>
+            <div class="card-body">
+                {% for similar in similar_articles %}
+                <div class="similar-article mb-3 pb-3 border-bottom">
+                    <h5>
+                        <a href="{% url 'articles:article_detail' similar.pk %}" class="text-decoration-none">
+                            {{ similar.get_title }}
+                        </a>
+                    </h5>
+                    <p class="text-muted mb-1">
+                        <i class="fas fa-users"></i> {{ similar.authors_list }}
+                    </p>
+                    <p class="mb-1">{{ similar.get_abstract|truncatewords:20 }}</p>
+                    <small class="text-muted">
+                        <i class="fas fa-eye"></i> {{ similar.views }} просмотров
+                        <i class="fas fa-download ms-2"></i> {{ similar.downloads }} загрузок
+                    </small>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="col-md-4">
+        <!-- Информация о статье -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> Информация о статье</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Язык:</strong> {{ article.get_language_display }}</p>
+                <p><strong>Статус:</strong> {{ article.get_status_display }}</p>
+                <p><strong>DOI:</strong> {{ article.doi|default:"Не указан" }}</p>
+                <p><strong>Просмотров:</strong> {{ article.views }}</p>
+                <p><strong>Загрузок:</strong> {{ article.downloads }}</p>
+            </div>
+        </div>
+        
+        <!-- Авторы -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-users"></i> Авторы</h5>
+            </div>
+            <div class="card-body">
+                {% for author in article.authors.all %}
+                <div class="author-item mb-3">
+                    <h6>{{ author.get_full_name }}</h6>
+                    {% if author.organization %}
+                    <p class="text-muted mb-1">{{ author.organization }}</p>
+                    {% endif %}
+                    {% if author.orcid %}
+                    <p class="text-muted mb-1">
+                        <i class="fas fa-id-card"></i> ORCID: {{ author.orcid }}
+                    </p>
+                    {% endif %}
+                    <a href="{% url 'articles:author_articles' author.id %}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-newspaper"></i> Все статьи автора
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Выпуск -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-book"></i> Выпуск</h5>
+            </div>
+            <div class="card-body">
+                <h6>{{ article.issue.get_title }}</h6>
+                <p class="text-muted mb-2">
+                    {{ article.issue.year }} год, №{{ article.issue.number }}
+                </p>
+                <p class="text-muted mb-3">
+                    {{ article.issue.published_at|date:"d.m.Y" }}
+                </p>
+                <a href="{% url 'issues:issue_detail' article.issue.year article.issue.number %}" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-eye"></i> Просмотреть выпуск
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

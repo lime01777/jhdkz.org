@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Новости - Journal of Health Development{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-bullhorn"></i> Новости
+        </h1>
+    </div>
+</div>
+
+{% if news_list %}
+<div class="row">
+    {% for news in news_list %}
+    <div class="col-md-6 mb-4">
+        <div class="card h-100 article-card">
+            {% if news.image %}
+            <img src="{{ news.image.url }}" class="card-img-top" alt="{{ news.title }}">
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">
+                    <a href="{% url 'core:news_detail' news.slug %}" class="text-decoration-none">
+                        {{ news.title }}
+                    </a>
+                </h5>
+                <p class="card-text text-muted">
+                    <i class="fas fa-calendar"></i> {{ news.published_at|date:"d.m.Y" }}
+                    {% if news.is_featured %}
+                    <span class="badge bg-warning ms-2">
+                        <i class="fas fa-star"></i> Рекомендуемая
+                    </span>
+                    {% endif %}
+                </p>
+                <p class="card-text">{{ news.excerpt|truncatewords:30 }}</p>
+                <a href="{% url 'core:news_detail' news.slug %}" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-arrow-right"></i> Читать далее
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Пагинация -->
+{% if is_paginated %}
+<nav aria-label="Навигация по страницам">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1">&laquo; Первая</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Предыдущая</a>
+            </li>
+        {% endif %}
+        
+        <li class="page-item active">
+            <span class="page-link">
+                Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+            </span>
+        </li>
+        
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Следующая</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Последняя &raquo;</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<div class="row">
+    <div class="col-12">
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> Новости пока не добавлены.
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %} 

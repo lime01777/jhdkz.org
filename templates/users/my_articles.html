@@ -1,0 +1,251 @@
+{% extends 'base.html' %}
+
+{% block title %}Мои статьи - Journal of Health Development{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Главная</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'users:dashboard' %}">Личный кабинет</a></li>
+                <li class="breadcrumb-item active">Мои статьи</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-newspaper"></i> Мои статьи
+        </h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <!-- Статистика автора -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Статистика публикаций</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3 mb-3">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body">
+                                <h3>{{ articles|length }}</h3>
+                                <p class="mb-0">Всего статей</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card bg-success text-white">
+                            <div class="card-body">
+                                <h3>{{ articles|length }}</h3>
+                                <p class="mb-0">Опубликовано</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card bg-info text-white">
+                            <div class="card-body">
+                                <h3>
+                                    {% with total_views=0 %}
+                                        {% for article in articles %}
+                                            {% with total_views=total_views|add:article.views %}{% endwith %}
+                                        {% endfor %}
+                                        {{ total_views }}
+                                    {% endwith %}
+                                </h3>
+                                <p class="mb-0">Просмотров</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card bg-warning text-white">
+                            <div class="card-body">
+                                <h3>
+                                    {% with total_downloads=0 %}
+                                        {% for article in articles %}
+                                            {% with total_downloads=total_downloads|add:article.downloads %}{% endwith %}
+                                        {% endfor %}
+                                        {{ total_downloads }}
+                                    {% endwith %}
+                                </h3>
+                                <p class="mb-0">Загрузок</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Список статей -->
+        {% if articles %}
+        <div class="row">
+            {% for article in articles %}
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 article-card">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <a href="{% url 'articles:article_detail' article.pk %}" class="text-decoration-none">
+                                {{ article.get_title|truncatewords:10 }}
+                            </a>
+                        </h5>
+                        <p class="card-text text-muted">
+                            <i class="fas fa-book"></i> {{ article.issue.get_title }}
+                        </p>
+                        <p class="card-text">
+                            {{ article.get_abstract|truncatewords:20 }}
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar"></i> {{ article.created_at|date:"d.m.Y" }}
+                                <i class="fas fa-eye ms-2"></i> {{ article.views }}
+                                <i class="fas fa-download ms-2"></i> {{ article.downloads }}
+                            </small>
+                            <div class="btn-group">
+                                <a href="{% url 'articles:article_detail' article.pk %}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-eye"></i> Просмотр
+                                </a>
+                                {% if article.pdf_file %}
+                                <a href="{{ article.pdf_file.url }}" class="btn btn-sm btn-outline-secondary" target="_blank">
+                                    <i class="fas fa-download"></i> PDF
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge bg-success">
+                                <i class="fas fa-check"></i> Опубликована
+                            </span>
+                            <small class="text-muted">
+                                Стр. {{ article.page_start }}-{{ article.page_end }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-newspaper fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">У вас пока нет опубликованных статей</h4>
+                <p class="text-muted mb-4">
+                    После публикации ваши статьи появятся в этом разделе.
+                </p>
+                <a href="#" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Добавить статью
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-md-4">
+        <!-- Информация об авторе -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-user"></i> Информация об авторе</h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    {% if user.avatar %}
+                    <img src="{{ user.avatar.url }}" class="img-fluid rounded-circle mb-3" alt="Аватар" style="width: 80px; height: 80px; object-fit: cover;">
+                    {% else %}
+                    <div class="bg-secondary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-user fa-2x text-white"></i>
+                    </div>
+                    {% endif %}
+                    <h6>{{ user.get_full_name }}</h6>
+                </div>
+                
+                {% if user.organization %}
+                <p class="text-muted mb-2">
+                    <i class="fas fa-building"></i> {{ user.organization }}
+                </p>
+                {% endif %}
+                
+                {% if user.orcid %}
+                <p class="text-muted mb-2">
+                    <i class="fas fa-id-card"></i> ORCID: {{ user.orcid }}
+                </p>
+                {% endif %}
+                
+                {% if user.bio %}
+                <p class="text-muted mb-3">
+                    {{ user.bio|truncatewords:20 }}
+                </p>
+                {% endif %}
+                
+                <div class="d-grid">
+                    <a href="{% url 'users:profile' %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-edit"></i> Редактировать профиль
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Быстрые действия -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-bolt"></i> Быстрые действия</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="#" class="btn btn-outline-success">
+                        <i class="fas fa-plus"></i> Добавить новую статью
+                    </a>
+                    <a href="{% url 'articles:article_search' %}" class="btn btn-outline-info">
+                        <i class="fas fa-search"></i> Поиск статей
+                    </a>
+                    <a href="{% url 'issues:issue_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-book"></i> Выпуски журнала
+                    </a>
+                    <a href="{% url 'users:dashboard' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left"></i> Назад в кабинет
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Информация о публикации -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> О публикации</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-2">
+                    <strong>Процесс публикации:</strong>
+                </p>
+                <ol class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="fas fa-1 text-primary"></i> Подготовка статьи
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-2 text-primary"></i> Отправка в редакцию
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-3 text-primary"></i> Рецензирование
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-4 text-primary"></i> Доработка (при необходимости)
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-5 text-primary"></i> Публикация
+                    </li>
+                </ol>
+                <a href="{% url 'core:about' %}" class="btn btn-sm btn-outline-primary">
+                    Узнать больше
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
