@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Создание новой статьи - Journal of Health Development{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">
+                        <i class="fas fa-plus-circle text-success"></i> Создание новой статьи
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- Основная информация -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-info-circle"></i> Основная информация
+                                </h5>
+                            </div>
+                            
+                            <!-- Русский язык (обязательный) -->
+                            <div class="col-12 mb-3">
+                                <label class="form-label fw-bold">Название статьи (русский) *</label>
+                                {{ form.title_ru }}
+                                {% if form.title_ru.errors %}
+                                    <div class="text-danger small">{{ form.title_ru.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-12 mb-3">
+                                <label class="form-label fw-bold">Аннотация (русский) *</label>
+                                {{ form.abstract_ru }}
+                                {% if form.abstract_ru.errors %}
+                                    <div class="text-danger small">{{ form.abstract_ru.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-12 mb-3">
+                                <label class="form-label fw-bold">Ключевые слова (русский) *</label>
+                                {{ form.keywords_ru }}
+                                <div class="form-text">Введите ключевые слова через запятую</div>
+                                {% if form.keywords_ru.errors %}
+                                    <div class="text-danger small">{{ form.keywords_ru.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Казахский язык (необязательный) -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-language"></i> Казахский язык (необязательно)
+                                </h5>
+                            </div>
+                            
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Название статьи (казахский)</label>
+                                {{ form.title_kk }}
+                                {% if form.title_kk.errors %}
+                                    <div class="text-danger small">{{ form.title_kk.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Аннотация (казахский)</label>
+                                {{ form.abstract_kk }}
+                                {% if form.abstract_kk.errors %}
+                                    <div class="text-danger small">{{ form.abstract_kk.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Ключевые слова (казахский)</label>
+                                {{ form.keywords_kk }}
+                                {% if form.keywords_kk.errors %}
+                                    <div class="text-danger small">{{ form.keywords_kk.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Английский язык (необязательный) -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-globe"></i> Английский язык (необязательно)
+                                </h5>
+                            </div>
+                            
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Название статьи (английский)</label>
+                                {{ form.title_en }}
+                                {% if form.title_en.errors %}
+                                    <div class="text-danger small">{{ form.title_en.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Аннотация (английский)</label>
+                                {{ form.abstract_en }}
+                                {% if form.abstract_en.errors %}
+                                    <div class="text-danger small">{{ form.abstract_en.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Ключевые слова (английский)</label>
+                                {{ form.keywords_en }}
+                                {% if form.keywords_en.errors %}
+                                    <div class="text-danger small">{{ form.keywords_en.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Техническая информация -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-cog"></i> Техническая информация
+                                </h5>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Страница начала *</label>
+                                {{ form.page_start }}
+                                {% if form.page_start.errors %}
+                                    <div class="text-danger small">{{ form.page_start.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Страница конца *</label>
+                                {{ form.page_end }}
+                                {% if form.page_end.errors %}
+                                    <div class="text-danger small">{{ form.page_end.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Язык статьи</label>
+                                {{ form.language }}
+                                {% if form.language.errors %}
+                                    <div class="text-danger small">{{ form.language.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Файл -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-file-pdf"></i> Файл статьи
+                                </h5>
+                            </div>
+                            
+                            <div class="col-12 mb-3">
+                                <label class="form-label fw-bold">PDF файл статьи *</label>
+                                {{ form.pdf_file }}
+                                <div class="form-text">Загрузите PDF файл вашей статьи</div>
+                                {% if form.pdf_file.errors %}
+                                    <div class="text-danger small">{{ form.pdf_file.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Кнопки -->
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save"></i> Создать статью
+                            </button>
+                            <a href="{% url 'users:my_articles' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Отмена
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Боковая панель -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle"></i> Информация
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-lightbulb"></i> Полезные советы:</h6>
+                        <ul class="mb-0">
+                            <li>Статья будет сохранена как <strong>черновик</strong></li>
+                            <li>Обязательно заполните поля на русском языке</li>
+                            <li>Поля на других языках заполняются по желанию</li>
+                            <li>PDF файл должен быть в хорошем качестве</li>
+                            <li>После создания вы сможете редактировать статью</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <h6><i class="fas fa-exclamation-triangle"></i> Важно:</h6>
+                        <p class="mb-0">Убедитесь, что все данные корректны перед отправкой. После создания статьи её можно будет отредактировать в разделе "Мои статьи".</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

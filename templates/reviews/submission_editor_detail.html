@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Подача {{ submission.submission_id }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>Подача {{ submission.submission_id }}</h1>
+                <a href="{% url 'reviews:submission_queue' %}" class="btn btn-secondary">
+                    ← Назад к очереди
+                </a>
+            </div>
+            
+            <!-- Статус -->
+            <div class="alert alert-{{ submission.status|default:'secondary' }} mb-4">
+                <strong>Статус:</strong> {{ submission.get_status_display_ru }}
+            </div>
+            
+            <div class="row">
+                <div class="col-md-8">
+                    <!-- Основная информация -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Информация о подаче</h5>
+                        </div>
+                        <div class="card-body">
+                            <h4>{{ submission.title_ru }}</h4>
+                            <p><strong>Автор:</strong> {{ submission.corresponding_author.get_full_name }}</p>
+                            <p><strong>Раздел:</strong> {{ submission.section.title_ru|default:"Не указан" }}</p>
+                            <hr>
+                            <h6>Аннотация:</h6>
+                            <p>{{ submission.abstract_ru|linebreaks }}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Рецензии -->
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Рецензии</h5>
+                            {% if submission.status == 'submitted' or submission.status == 'reviewing' %}
+                                <a href="{% url 'reviews:assign_reviewer' submission.pk %}" class="btn btn-sm btn-primary">
+                                    Назначить рецензента
+                                </a>
+                            {% endif %}
+                        </div>
+                        <div class="card-body">
+                            {% if assignments %}
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Рецензент</th>
+                                                <th>Статус</th>
+                                                <th>Дедлайн</th>
+                                                <th>Действия</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for assignment in assignments %}
+                                            <tr>
+                                                <td>{{ assignment.reviewer.get_full_name }}</td>
+                                                <td>
+                                                    <span class="badge bg-{{ assignment.status|default:'secondary' }}">
+                                                        {{ assignment.get_status_display }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    {% if assignment.review_due %}
+                                                        {{ assignment.review_due|date:"d.m.Y" }}
+                                                        {% if assignment.is_overdue %}
+                                                            <span class="badge bg-danger">Просрочено</span>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <span class="text-muted">Не указан</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if assignment.review %}
+                                                        <a href="{% url 'reviews:do_review' assignment.review.pk %}" 
+                                                           class="btn btn-sm btn-outline-primary">
+                                                            Просмотр
+                                                        </a>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p class="text-muted">Рецензенты не назначены</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Редакторские решения -->
+                    {% if decisions %}
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">История решений</h5>
+                        </div>
+                        <div class="card-body">
+                            {% for decision in decisions %}
+                                <div class="border-bottom pb-3 mb-3">
+                                    <p><strong>{{ decision.get_decision_display_ru }}</strong></p>
+                                    <p><small class="text-muted">
+                                        {{ decision.decision_maker.get_full_name }}, 
+                                        {{ decision.decided_at|date:"d.m.Y H:i" }}
+                                    </small></p>
+                                    {% if decision.comments_for_author %}
+                                        <p>{{ decision.comments_for_author|linebreaks }}</p>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-4">
+                    <!-- Действия -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Действия</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if not submission.assigned_editor %}
+                                <form method="post" action="{% url 'reviews:submission_editor_detail' submission.pk %}">
+                                    {% csrf_token %}
+                                    <button type="submit" name="assign_to_me" class="btn btn-primary w-100 mb-2">
+                                        Назначить себе
+                                    </button>
+                                </form>
+                            {% endif %}
+                            
+                            {% if submission.status == 'review_completed' or reviews %}
+                                <a href="{% url 'reviews:make_decision' submission.pk %}" 
+                                   class="btn btn-success w-100 mb-2">
+                                    Принять решение
+                                </a>
+                            {% endif %}
+                            
+                            {% if submission.status == 'submitted' %}
+                                <a href="{% url 'reviews:assign_reviewer' submission.pk %}" 
+                                   class="btn btn-info w-100 mb-2">
+                                    Назначить рецензента
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Информация -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Информация</h5>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Создано:</strong> {{ submission.created_at|date:"d.m.Y H:i" }}</p>
+                            {% if submission.submitted_at %}
+                                <p><strong>Отправлено:</strong> {{ submission.submitted_at|date:"d.m.Y H:i" }}</p>
+                            {% endif %}
+                            {% if submission.assigned_editor %}
+                                <p><strong>Редактор:</strong> {{ submission.assigned_editor.get_full_name }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

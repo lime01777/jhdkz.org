@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Назначение рецензента{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <h1 class="mb-4">Назначить рецензента</h1>
+            
+            <div class="alert alert-info">
+                <strong>Подача:</strong> {{ submission.submission_id }}<br>
+                <strong>Название:</strong> {{ submission.title_ru }}
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        {% crispy form %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

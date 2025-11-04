@@ -1,6 +1,10 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
+<<<<<<< HEAD
 from .models import SiteSettings, Page, Contact, News
+=======
+from .models import SiteSettings, Page, Contact, News, Redirect, EditorialTeam
+>>>>>>> bebf4c4 (initial commit)
 
 @admin.register(SiteSettings)
 class SiteSettingsAdmin(admin.ModelAdmin):
@@ -158,3 +162,40 @@ class NewsAdmin(admin.ModelAdmin):
         updated = queryset.update(is_featured=False)
         self.message_user(request, f'{updated} новостей убрано из рекомендуемых.')
     unfeature_news.short_description = "Убрать из рекомендуемых"
+<<<<<<< HEAD
+=======
+
+
+@admin.register(Redirect)
+class RedirectAdmin(admin.ModelAdmin):
+    list_display = ("old_url", "new_path", "is_active", "updated_at")
+    list_filter = ("is_active",)
+    search_fields = ("old_url", "new_path")
+
+
+@admin.register(EditorialTeam)
+class EditorialTeamAdmin(admin.ModelAdmin):
+    """Админка для редакционной коллегии."""
+    
+    list_display = ('user', 'role', 'section', 'is_active', 'order', 'started_at')
+    list_filter = ('role', 'is_active', 'section', 'started_at')
+    search_fields = ('user__full_name', 'user__username', 'user__email', 'affiliation')
+    ordering = ('order', 'role', 'user')
+    
+    fieldsets = (
+        (_('Основная информация'), {
+            'fields': ('user', 'role', 'section', 'order', 'is_active')
+        }),
+        (_('Биография'), {
+            'fields': ('bio_ru', 'bio_kk', 'bio_en')
+        }),
+        (_('Контактная информация'), {
+            'fields': ('email', 'orcid', 'affiliation')
+        }),
+        (_('Даты работы'), {
+            'fields': ('started_at', 'ended_at')
+        }),
+    )
+    
+    readonly_fields = ('created_at', 'updated_at')
+>>>>>>> bebf4c4 (initial commit)

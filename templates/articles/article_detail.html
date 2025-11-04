@@ -20,7 +20,31 @@
         <!-- Основная информация о статье -->
         <div class="card mb-4">
             <div class="card-body">
+<<<<<<< HEAD
                 <h1 class="card-title">{{ article.get_title }}</h1>
+=======
+                <h1 class="card-title">
+                    {{ article.get_title }}
+                    {% if article.status != 'published' and can_view_draft %}
+                        <span class="badge bg-warning ms-2">
+                            {% if article.status == 'draft' %}Черновик
+                            {% elif article.status == 'submitted' %}Отправлена
+                            {% elif article.status == 'review' %}На рецензии
+                            {% elif article.status == 'accepted' %}Принята
+                            {% elif article.status == 'rejected' %}Отклонена
+                            {% else %}{{ article.get_status_display }}
+                            {% endif %}
+                        </span>
+                    {% endif %}
+                </h1>
+                
+                {% if article.status != 'published' and can_view_draft %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i> 
+                    <strong>Внимание:</strong> Вы просматриваете черновик статьи. Эта статья не видна другим пользователям.
+                </div>
+                {% endif %}
+>>>>>>> bebf4c4 (initial commit)
                 
                 <div class="article-meta mb-3">
                     <p class="text-muted">

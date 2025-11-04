@@ -10,6 +10,12 @@ urlpatterns = [
     # Поиск статей
     path('search/', views.article_search, name='article_search'),
     
+<<<<<<< HEAD
+=======
+    # Создание статьи (только для авторов)
+    path('create/', views.ArticleCreateView.as_view(), name='article_create'),
+    
+>>>>>>> bebf4c4 (initial commit)
     # Детальная страница статьи
     path('<int:pk>/', views.ArticleDetailView.as_view(), name='article_detail'),
     

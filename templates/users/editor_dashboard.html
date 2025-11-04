@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Редакторская панель{% endblock %}
+
+{% block content %}
+<h1 class="mb-4"><i class="fas fa-user-gear"></i> Редакторская панель</h1>
+
+<div class="row">
+  <div class="col-md-4 mb-3">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title">Авторы</h5>
+        <p class="display-6">{{ authors_count }}</p>
+        <a href="{% url 'users:editor_authors' %}" class="btn btn-primary btn-sm">Список авторов</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4 mb-3">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title">Статьи</h5>
+        <p class="display-6">{{ articles_count }}</p>
+        <a href="/admin/articles/article/" class="btn btn-outline-primary btn-sm">Открыть в админке</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4 mb-3">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title">Выпуски</h5>
+        <p class="display-6">{{ issues_count }}</p>
+        <a href="/admin/issues/issue/" class="btn btn-outline-primary btn-sm">Открыть в админке</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+

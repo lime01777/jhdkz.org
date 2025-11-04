@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+
+{% block title %}Подача {{ submission.submission_id }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>Подача {{ submission.submission_id }}</h1>
+                <div>
+                    {% if submission.status == 'draft' %}
+                        <a href="{% url 'submissions:step2' submission.pk %}" class="btn btn-primary">
+                            Продолжить редактирование
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Статус -->
+            <div class="alert alert-{{ submission.status|default:'secondary' }} mb-4">
+                <strong>Статус:</strong> {{ submission.get_status_display_ru }}
+                {% if submission.submitted_at %}
+                    <br><small>Отправлена: {{ submission.submitted_at|date:"d.m.Y H:i" }}</small>
+                {% endif %}
+            </div>
+            
+            <div class="row">
+                <div class="col-md-8">
+                    <!-- Основная информация -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Основная информация</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="200">Название (RU):</th>
+                                    <td>{{ submission.title_ru|default:"Не указано" }}</td>
+                                </tr>
+                                {% if submission.title_kk %}
+                                <tr>
+                                    <th>Название (KK):</th>
+                                    <td>{{ submission.title_kk }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if submission.title_en %}
+                                <tr>
+                                    <th>Название (EN):</th>
+                                    <td>{{ submission.title_en }}</td>
+                                </tr>
+                                {% endif %}
+                                <tr>
+                                    <th>Раздел:</th>
+                                    <td>{{ submission.section.title_ru|default:"Не указан" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Язык:</th>
+                                    <td>{{ submission.get_language_display }}</td>
+                                </tr>
+                            </table>
+                            
+                            <h6>Аннотация:</h6>
+                            <p>{{ submission.abstract_ru|default:"Не указана"|linebreaks }}</p>
+                            
+                            {% if submission.keywords_ru %}
+                            <h6>Ключевые слова:</h6>
+                            <p>{{ submission.keywords_ru }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Авторы -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Авторы</h5>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Корреспондирующий автор:</strong> {{ submission.corresponding_author.get_full_name }}</p>
+                            {% if authors %}
+                                <h6>Соавторы:</h6>
+                                <ul>
+                                    {% for author in authors %}
+                                        <li>{{ author.author.get_full_name }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Рецензии -->
+                    {% if reviews %}
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Рецензии</h5>
+                        </div>
+                        <div class="card-body">
+                            {% for review in reviews %}
+                                <div class="border-bottom pb-3 mb-3">
+                                    <p><strong>Рецензент:</strong> 
+                                    {% if review.is_anonymous %}
+                                        Анонимный
+                                    {% else %}
+                                        {{ review.reviewer.get_full_name }}
+                                    {% endif %}
+                                    </p>
+                                    {% if review.average_score %}
+                                        <p><strong>Средняя оценка:</strong> {{ review.average_score|floatformat:1 }}/5.0</p>
+                                    {% endif %}
+                                    <p><strong>Рекомендация:</strong> {{ review.get_recommendation_display }}</p>
+                                    {% if review.comments_for_author %}
+                                        <div class="mt-2">
+                                            <strong>Комментарии:</strong>
+                                            <p class="mt-1">{{ review.comments_for_author|linebreaks }}</p>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-4">
+                    <!-- Файлы -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Файлы</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if files %}
+                                <ul class="list-group list-group-flush">
+                                    {% for file in files %}
+                                    <li class="list-group-item">
+                                        <a href="{{ file.file.url }}" target="_blank">
+                                            {{ file.name|default:file.file.name }}
+                                        </a>
+                                        <br><small class="text-muted">{{ file.get_file_type_display }}</small>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="text-muted">Файлы не загружены</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Действия -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Действия</h5>
+                        </div>
+                        <div class="card-body">
+                            <a href="{% url 'submissions:list' %}" class="btn btn-secondary btn-sm w-100 mb-2">
+                                ← К списку подач
+                            </a>
+                            {% if submission.status == 'draft' %}
+                                <a href="{% url 'submissions:step5' submission.pk %}" class="btn btn-primary btn-sm w-100 mb-2">
+                                    Отправить
+                                </a>
+                            {% endif %}
+                            {% if submission.status not in ['published', 'declined'] %}
+                                <a href="{% url 'submissions:withdraw' submission.pk %}" class="btn btn-warning btn-sm w-100">
+                                    Отозвать подачу
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

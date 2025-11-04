@@ -1,14 +1,24 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
+<<<<<<< HEAD
 from .models import Submission
+=======
+from .models import Submission, Section, SubmissionFile, SubmissionAuthor
+>>>>>>> bebf4c4 (initial commit)
 
 @admin.register(Submission)
 class SubmissionAdmin(admin.ModelAdmin):
     """Админка для модели отправки."""
     
+<<<<<<< HEAD
     list_display = ('submission_id', 'title', 'corresponding_author', 'status', 'submitted_at', 'created_at')
     list_filter = ('status', 'language', 'submitted_at', 'created_at')
     search_fields = ('title', 'submission_id', 'corresponding_author__full_name', 'corresponding_author__username')
+=======
+    list_display = ('submission_id', 'title_ru', 'corresponding_author', 'status', 'submitted_at', 'created_at')
+    list_filter = ('status', 'language', 'submitted_at', 'created_at', 'section')
+    search_fields = ('title_ru', 'title_kk', 'title_en', 'submission_id', 'corresponding_author__full_name', 'corresponding_author__username')
+>>>>>>> bebf4c4 (initial commit)
     ordering = ('-created_at',)
     
     # Фильтры в правой панели
@@ -17,12 +27,19 @@ class SubmissionAdmin(admin.ModelAdmin):
     # Поля для редактирования
     fieldsets = (
         (_('Основная информация'), {
+<<<<<<< HEAD
             'fields': ('submission_id', 'title', 'abstract', 'keywords', 'language')
+=======
+            'fields': ('submission_id', 'section', 'title_ru', 'title_kk', 'title_en', 
+                      'abstract_ru', 'abstract_kk', 'abstract_en',
+                      'keywords_ru', 'keywords_kk', 'keywords_en', 'language')
+>>>>>>> bebf4c4 (initial commit)
         }),
         (_('Авторы'), {
             'fields': ('corresponding_author', 'co_authors')
         }),
         (_('Файлы'), {
+<<<<<<< HEAD
             'fields': ('manuscript_file', 'supplementary_files')
         }),
         (_('Статус и workflow'), {
@@ -30,6 +47,22 @@ class SubmissionAdmin(admin.ModelAdmin):
         }),
         (_('Комментарии'), {
             'fields': ('author_comments', 'editor_comments')
+=======
+            'fields': ('manuscript_file',)
+        }),
+        (_('Статус и workflow'), {
+            'fields': ('status', 'submission_type', 'assigned_editor', 'review_type',
+                      'submitted_at', 'last_review_date', 'last_revision_date', 'editor_decision_date')
+        }),
+        (_('Исследовательская информация'), {
+            'fields': ('research_field', 'methodology', 'funding')
+        }),
+        (_('Этические аспекты'), {
+            'fields': ('ethics_approval', 'ethics_committee', 'conflict_of_interest', 'data_availability')
+        }),
+        (_('Комментарии'), {
+            'fields': ('author_comments', 'editor_comments', 'editor_reviewer_comments')
+>>>>>>> bebf4c4 (initial commit)
         }),
     )
     
@@ -66,4 +99,39 @@ class SubmissionAdmin(admin.ModelAdmin):
     
     def get_queryset(self, request):
         """Оптимизированный запрос с select_related."""
+<<<<<<< HEAD
         return super().get_queryset(request).select_related('corresponding_author')
+=======
+        return super().get_queryset(request).select_related('corresponding_author', 'section', 'assigned_editor')
+    
+    def title_ru(self, obj):
+        """Отображение названия."""
+        return obj.title_ru[:50] + '...' if len(obj.title_ru) > 50 else obj.title_ru
+    title_ru.short_description = "Название"
+
+
+@admin.register(Section)
+class SectionAdmin(admin.ModelAdmin):
+    """Админка для разделов."""
+    list_display = ('title_ru', 'slug', 'require_review', 'review_type', 'is_active', 'order')
+    list_filter = ('is_active', 'require_review', 'review_type')
+    search_fields = ('title_ru', 'title_kk', 'title_en', 'slug')
+    prepopulated_fields = {'slug': ('title_ru',)}
+
+
+@admin.register(SubmissionFile)
+class SubmissionFileAdmin(admin.ModelAdmin):
+    """Админка для файлов подачи."""
+    list_display = ('submission', 'name', 'file_type', 'version', 'uploaded_at', 'uploaded_by')
+    list_filter = ('file_type', 'version', 'uploaded_at')
+    search_fields = ('submission__submission_id', 'name', 'description')
+    ordering = ('-uploaded_at',)
+
+
+@admin.register(SubmissionAuthor)
+class SubmissionAuthorAdmin(admin.ModelAdmin):
+    """Админка для авторов подачи."""
+    list_display = ('submission', 'author', 'author_order', 'is_corresponding', 'is_principal')
+    list_filter = ('is_corresponding', 'is_principal')
+    search_fields = ('submission__submission_id', 'author__full_name', 'author__username')
+>>>>>>> bebf4c4 (initial commit)

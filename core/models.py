@@ -1,5 +1,9 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+<<<<<<< HEAD
+=======
+from django.urls import reverse
+>>>>>>> bebf4c4 (initial commit)
 
 class SiteSettings(models.Model):
     """
@@ -131,3 +135,115 @@ class News(models.Model):
         if not self.published_at and self.is_published:
             self.published_at = timezone.now()
         super().save(*args, **kwargs)
+<<<<<<< HEAD
+=======
+
+
+class Redirect(models.Model):
+    """Простая модель редиректов. Используется для миграции старых URL.
+    TODO: при наличии django.contrib.redirects можно заменить на стандартную.
+    """
+    old_url = models.CharField("Старый URL", max_length=500, unique=True)
+    new_path = models.CharField("Новый путь", max_length=500)
+    is_active = models.BooleanField("Активен", default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Редирект"
+        verbose_name_plural = "Редиректы"
+        ordering = ['-updated_at']
+
+    def __str__(self):
+        return f"{self.old_url} -> {self.new_path}"
+
+    def get_absolute_url(self):
+        return self.new_path
+
+
+class EditorialTeam(models.Model):
+    """
+    Редакционная коллегия журнала (Editor-in-Chief, Section Editors и т.д.).
+    """
+    user = models.ForeignKey(
+        'users.User',
+        on_delete=models.CASCADE,
+        related_name='editorial_roles',
+        verbose_name="Пользователь"
+    )
+    
+    # Роль в редакции
+    ROLE_CHOICES = [
+        ('editor_in_chief', 'Главный редактор'),
+        ('deputy_editor', 'Заместитель главного редактора'),
+        ('section_editor', 'Редактор раздела'),
+        ('associate_editor', 'Ассоциированный редактор'),
+        ('copy_editor', 'Редактор-корректор'),
+        ('layout_editor', 'Редактор верстки'),
+        ('production_editor', 'Редактор производства'),
+    ]
+    role = models.CharField("Роль", max_length=20, choices=ROLE_CHOICES)
+    
+    # Раздел (для редакторов разделов)
+    section = models.ForeignKey(
+        'submissions.Section',
+        on_delete=models.SET_NULL,
+        related_name='editors',
+        null=True,
+        blank=True,
+        verbose_name="Раздел"
+    )
+    
+    # Порядок отображения
+    order = models.PositiveIntegerField("Порядок", default=0)
+    
+    # Биография
+    bio_ru = models.TextField("Биография (русский)", blank=True)
+    bio_kk = models.TextField("Биография (казахский)", blank=True)
+    bio_en = models.TextField("Биография (английский)", blank=True)
+    
+    # Дополнительные поля
+    email = models.EmailField("Email", blank=True)
+    orcid = models.CharField("ORCID", max_length=19, blank=True)
+    affiliation = models.CharField("Аффилиация", max_length=500, blank=True)
+    
+    # Статус
+    is_active = models.BooleanField("Активен", default=True)
+    
+    # Даты
+    started_at = models.DateField("Дата начала работы", null=True, blank=True)
+    ended_at = models.DateField("Дата окончания работы", null=True, blank=True)
+    created_at = models.DateTimeField("Дата создания", auto_now_add=True)
+    updated_at = models.DateTimeField("Дата обновления", auto_now=True)
+    
+    class Meta:
+        verbose_name = "Член редакционной коллегии"
+        verbose_name_plural = "Редакционная коллегия"
+        ordering = ['order', 'role', 'user']
+        unique_together = ('user', 'role', 'section')
+    
+    def __str__(self):
+        role_name = self.get_role_display()
+        if self.section:
+            return f"{self.user.get_full_name()} - {role_name} ({self.section.title_ru})"
+        return f"{self.user.get_full_name()} - {role_name}"
+    
+    def get_bio(self, language='ru'):
+        """Возвращает биографию на указанном языке."""
+        bio_map = {
+            'ru': self.bio_ru,
+            'kk': self.bio_kk,
+            'en': self.bio_en,
+        }
+        return bio_map.get(language, self.bio_ru) or self.bio_ru
+    
+    @property
+    def is_editor_in_chief(self):
+        """Проверяет, является ли главным редактором."""
+        return self.role == 'editor_in_chief'
+    
+    @property
+    def is_section_editor(self):
+        """Проверяет, является ли редактором раздела."""
+        return self.role == 'section_editor'
+>>>>>>> bebf4c4 (initial commit)

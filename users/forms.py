@@ -44,6 +44,7 @@ class AuthorRegistrationForm(UserCreationForm):
     
     class Meta:
         model = User
+<<<<<<< HEAD
         fields = ('username', 'email', 'full_name', 'organization', 'orcid', 'bio', 'password1', 'password2')
         
     def __init__(self, *args, **kwargs):
@@ -52,6 +53,22 @@ class AuthorRegistrationForm(UserCreationForm):
         self.fields['role'].initial = 'author'
         self.fields['role'].widget = forms.HiddenInput()
         
+=======
+        # Поля максимально близкие к форме OJS по ссылке
+        fields = (
+            'email',        # Адрес электронной почты
+            'username',     # Имя пользователя
+            'password1',    # Пароль
+            'password2',    # Повторите пароль
+            'full_name',    # Имя / ФИО
+            'organization', # Организация
+            'orcid',        # ORCID (необязательно)
+            'bio',          # Короткая биография
+        )
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+>>>>>>> bebf4c4 (initial commit)
         # Настройка полей
         self.fields['email'].required = True
         self.fields['full_name'].required = True

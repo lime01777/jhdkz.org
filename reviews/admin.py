@@ -1,6 +1,10 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
+<<<<<<< HEAD
 from .models import Review
+=======
+from .models import Review, ReviewAssignment, EditorialDecision
+>>>>>>> bebf4c4 (initial commit)
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
@@ -11,6 +15,7 @@ class ReviewAdmin(admin.ModelAdmin):
     search_fields = ('submission__title', 'reviewer__full_name', 'reviewer__username')
     ordering = ('-assigned_at',)
     
+<<<<<<< HEAD
     # Поля для редактирования
     fieldsets = (
         (_('Основная информация'), {
@@ -30,6 +35,8 @@ class ReviewAdmin(admin.ModelAdmin):
         }),
     )
     
+=======
+>>>>>>> bebf4c4 (initial commit)
     # Поля только для чтения
     readonly_fields = ('assigned_at', 'created_at', 'updated_at')
     
@@ -57,9 +64,111 @@ class ReviewAdmin(admin.ModelAdmin):
     
     def average_score(self, obj):
         """Средняя оценка."""
+<<<<<<< HEAD
         return f"{obj.average_score:.1f}"
+=======
+        avg = obj.average_score
+        return f"{avg:.1f}" if avg else "N/A"
+>>>>>>> bebf4c4 (initial commit)
     average_score.short_description = "Средняя оценка"
     
     def get_queryset(self, request):
         """Оптимизированный запрос с select_related."""
+<<<<<<< HEAD
         return super().get_queryset(request).select_related('submission', 'reviewer')
+=======
+        return super().get_queryset(request).select_related('submission', 'reviewer', 'assignment')
+    
+    # Обновленные поля для OJS
+    fieldsets = (
+        (_('Основная информация'), {
+            'fields': ('submission', 'reviewer', 'assignment', 'status', 'recommendation', 'revision_number')
+        }),
+        (_('Оценки'), {
+            'fields': ('originality', 'scientific_value', 'methodology', 'presentation', 'language_quality', 'relevance')
+        }),
+        (_('Комментарии'), {
+            'fields': ('comments_for_author', 'comments_for_editor', 'general_comments', 
+                      'strengths', 'weaknesses', 'suggestions')
+        }),
+        (_('Файлы'), {
+            'fields': ('review_file', 'annotated_manuscript', 'reviewed_file_version')
+        }),
+        (_('Настройки'), {
+            'fields': ('is_anonymous', 'conflict_of_interest', 'conflict_details', 
+                      'visible_to_author', 'time_spent', 'revision_requested')
+        }),
+        (_('Даты'), {
+            'fields': ('assigned_at', 'completed_at', 'created_at', 'updated_at')
+        }),
+    )
+
+
+@admin.register(ReviewAssignment)
+class ReviewAssignmentAdmin(admin.ModelAdmin):
+    """Админка для назначения рецензентов."""
+    
+    list_display = ('submission', 'reviewer', 'status', 'assigned_at', 'review_due', 'is_overdue')
+    list_filter = ('status', 'is_blind', 'can_view_identity', 'assigned_at')
+    search_fields = ('submission__submission_id', 'submission__title_ru', 'reviewer__full_name', 'reviewer__username')
+    ordering = ('-assigned_at',)
+    
+    fieldsets = (
+        (_('Основная информация'), {
+            'fields': ('submission', 'reviewer', 'assigned_by', 'status')
+        }),
+        (_('Дедлайны'), {
+            'fields': ('response_due', 'review_due', 'responded_at')
+        }),
+        (_('Сообщения'), {
+            'fields': ('invitation_message', 'decline_reason')
+        }),
+        (_('Настройки'), {
+            'fields': ('is_blind', 'can_view_identity')
+        }),
+        (_('Рецензия'), {
+            'fields': ('review',)
+        }),
+    )
+    
+    readonly_fields = ('assigned_at', 'responded_at')
+    
+    def is_overdue(self, obj):
+        """Проверяет просрочку дедлайна."""
+        return obj.is_overdue()
+    is_overdue.boolean = True
+    is_overdue.short_description = "Просрочено"
+
+
+@admin.register(EditorialDecision)
+class EditorialDecisionAdmin(admin.ModelAdmin):
+    """Админка для редакторских решений."""
+    
+    list_display = ('submission', 'decision', 'decision_maker', 'decided_at', 'is_final')
+    list_filter = ('decision', 'is_final', 'decided_at')
+    search_fields = ('submission__submission_id', 'submission__title_ru', 'decision_maker__full_name')
+    ordering = ('-decided_at',)
+    
+    fieldsets = (
+        (_('Основная информация'), {
+            'fields': ('submission', 'decision_maker', 'decision', 'is_final')
+        }),
+        (_('Комментарии'), {
+            'fields': ('comments', 'comments_for_author', 'internal_notes')
+        }),
+        (_('Рецензии'), {
+            'fields': ('reviews',)
+        }),
+        (_('Дата'), {
+            'fields': ('decided_at',)
+        }),
+    )
+    
+    readonly_fields = ('decided_at',)
+    filter_horizontal = ('reviews',)
+    
+    def get_decision_display_ru(self, obj):
+        """Отображение решения на русском."""
+        return obj.get_decision_display_ru()
+    get_decision_display_ru.short_description = "Решение"
+>>>>>>> bebf4c4 (initial commit)

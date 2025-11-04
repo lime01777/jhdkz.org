@@ -3,16 +3,34 @@ URL configuration for jhdkz_portal project.
 """
 from django.contrib import admin
 from django.urls import path, include
+<<<<<<< HEAD
+=======
+from django.urls import reverse_lazy
+from django.views.generic import RedirectView
+>>>>>>> bebf4c4 (initial commit)
 from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+<<<<<<< HEAD
     path('', include('core.urls')),
     path('issues/', include('issues.urls')),
     path('articles/', include('articles.urls')),
     path('users/', include('users.urls')),
     path('accounts/', include('django.contrib.auth.urls')), # Basic auth URLs
+=======
+    # Совместимость: после логина некоторые сборки редиректят на /accounts/profile/
+    path('accounts/profile/', RedirectView.as_view(url=reverse_lazy('users:dashboard'), permanent=False)),
+    path('issues/', include('issues.urls')),
+    path('articles/', include('articles.urls')),git
+    path('users/', include('users.urls')),
+    path('submissions/', include('submissions.urls')),  # OJS submission system
+    path('reviews/', include('reviews.urls')),  # OJS review system
+    path('accounts/', include('django.contrib.auth.urls')), # Basic auth URLs
+    # ВНИМАНИЕ: корневые маршруты core в самом конце, чтобы не перехватывать /issues/ и прочие
+    path('', include('core.urls')),
+>>>>>>> bebf4c4 (initial commit)
 ]
 
 if settings.DEBUG:

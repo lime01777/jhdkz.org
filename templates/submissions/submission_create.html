@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Новая подача - Шаг 1{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="mb-4">Подача новой статьи</h1>
+            
+            <!-- Прогресс -->
+            <div class="progress mb-4" style="height: 30px;">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" 
+                     style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">
+                    Шаг 1 из 5: Основная информация
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Основная информация о статье</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {% crispy form %}
+                    </form>
+                </div>
+            </div>
+            
+            <div class="mt-3">
+                <small class="text-muted">
+                    <i class="bi bi-info-circle"></i> 
+                    После заполнения вы сможете продолжить с загрузкой файлов и добавлением соавторов.
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

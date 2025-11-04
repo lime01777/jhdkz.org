@@ -52,9 +52,18 @@ class User(AbstractUser):
         return self.role == 'reviewer'
     
     def is_editor(self):
+<<<<<<< HEAD
         """Проверяет, является ли пользователь редактором."""
         return self.role == 'editor'
     
     def is_admin(self):
         """Проверяет, является ли пользователь администратором."""
         return self.role == 'admin'
+=======
+        """Проверяет, является ли пользователь редактором (включая администраторов)."""
+        return self.role in ['editor', 'admin'] or self.is_staff
+    
+    def is_admin(self):
+        """Проверяет, является ли пользователь администратором."""
+        return self.role == 'admin'
+>>>>>>> bebf4c4 (initial commit)
