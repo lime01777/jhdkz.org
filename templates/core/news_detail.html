@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ news.title }} - Journal of Health Development{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Главная</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:news_list' %}">Новости</a></li>
+                <li class="breadcrumb-item active">{{ news.title }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h1 class="card-title">{{ news.title }}</h1>
+                
+                <div class="news-meta mb-4">
+                    <p class="text-muted">
+                        <i class="fas fa-calendar"></i> {{ news.published_at|date:"d.m.Y H:i" }}
+                        {% if news.is_featured %}
+                        <span class="badge bg-warning ms-2">
+                            <i class="fas fa-star"></i> Рекомендуемая
+                        </span>
+                        {% endif %}
+                    </p>
+                </div>
+                
+                {% if news.image %}
+                <div class="text-center mb-4">
+                    <img src="{{ news.image.url }}" class="img-fluid rounded" alt="{{ news.title }}">
+                </div>
+                {% endif %}
+                
+                <div class="news-content">
+                    {{ news.content|linebreaks }}
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{% url 'core:news_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> К списку новостей
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <!-- Последние новости -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-newspaper"></i> Последние новости</h5>
+            </div>
+            <div class="card-body">
+                {% for recent_news in recent_news_list %}
+                <div class="recent-news-item mb-3 pb-3 border-bottom">
+                    <h6>
+                        <a href="{% url 'core:news_detail' recent_news.slug %}" class="text-decoration-none">
+                            {{ recent_news.title }}
+                        </a>
+                    </h6>
+                    <small class="text-muted">
+                        <i class="fas fa-calendar"></i> {{ recent_news.published_at|date:"d.m.Y" }}
+                    </small>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Рекомендуемые новости -->
+        {% if featured_news %}
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-star"></i> Рекомендуемые</h5>
+            </div>
+            <div class="card-body">
+                {% for featured in featured_news %}
+                <div class="featured-news-item mb-3 pb-3 border-bottom">
+                    <h6>
+                        <a href="{% url 'core:news_detail' featured.slug %}" class="text-decoration-none">
+                            {{ featured.title }}
+                        </a>
+                    </h6>
+                    <small class="text-muted">
+                        <i class="fas fa-calendar"></i> {{ featured.published_at|date:"d.m.Y" }}
+                    </small>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ issue.get_title }} - Journal of Health Development{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Главная</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'issues:issue_list' %}">Выпуски</a></li>
+                <li class="breadcrumb-item active">{{ issue.get_title }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h1 class="card-title">{{ issue.get_title }}</h1>
+                <p class="text-muted">
+                    <i class="fas fa-calendar"></i> Дата публикации: {{ issue.published_at|date:"d.m.Y" }}
+                </p>
+                {% if issue.description %}
+                <p class="card-text">{{ issue.description }}</p>
+                {% endif %}
+                
+                <div class="d-flex gap-2">
+                    {% if issue.pdf_file %}
+                    <a href="{{ issue.pdf_file.url }}" class="btn btn-primary" target="_blank">
+                        <i class="fas fa-download"></i> Скачать полный выпуск (PDF)
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'issues:issue_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> К списку выпусков
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        {% if articles %}
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0">
+                    <i class="fas fa-newspaper"></i> Статьи в выпуске
+                </h3>
+            </div>
+            <div class="card-body">
+                {% for article in articles %}
+                <div class="article-item mb-4 pb-4 border-bottom">
+                    <h4>
+                        <a href="{% url 'articles:article_detail' article.pk %}" class="text-decoration-none">
+                            {{ article.get_title }}
+                        </a>
+                    </h4>
+                    <p class="text-muted mb-2">
+                        <i class="fas fa-users"></i> {{ article.authors_list }}
+                    </p>
+                    <p class="mb-2">
+                        {{ article.get_abstract|truncatewords:50 }}
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="fas fa-file-alt"></i> Страницы: {{ article.get_pages_info }}
+                            <i class="fas fa-eye ms-3"></i> {{ article.views }} просмотров
+                            <i class="fas fa-download ms-3"></i> {{ article.downloads }} загрузок
+                        </small>
+                        <div class="btn-group">
+                            <a href="{% url 'articles:article_detail' article.pk %}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye"></i> Читать
+                            </a>
+                            {% if article.pdf_file %}
+                            <a href="{{ article.pdf_file.url }}" class="btn btn-sm btn-outline-secondary" target="_blank">
+                                <i class="fas fa-download"></i> PDF
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> Статьи в этом выпуске пока не добавлены.
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> Информация о выпуске</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Год:</strong> {{ issue.year }}</p>
+                <p><strong>Номер:</strong> {{ issue.number }}</p>
+                <p><strong>Статей:</strong> {{ issue.articles_count }}</p>
+                {% if issue.keywords %}
+                <p><strong>Ключевые слова:</strong> {{ issue.keywords }}</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if issue.cover_image %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-image"></i> Обложка выпуска</h5>
+            </div>
+            <div class="card-body text-center">
+                <img src="{{ issue.cover_image.url }}" class="img-fluid" alt="Обложка выпуска">
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}Редактирование автора{% endblock %}
+
+{% block content %}
+<h1 class="mb-4"><i class="fas fa-user-edit"></i> Редактирование автора</h1>
+
+<form method="post" enctype="multipart/form-data" class="card p-3">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <div class="d-flex gap-2">
+    <button type="submit" class="btn btn-primary">Сохранить</button>
+    <a href="{% url 'users:editor_authors' %}" class="btn btn-outline-secondary">Отмена</a>
+  </div>
+  </form>
+{% endblock %}
+
+

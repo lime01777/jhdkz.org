@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}Панель рецензента{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="mb-4">
+                <i class="bi bi-file-earmark-text"></i> Панель рецензента
+            </h1>
+            
+            <!-- Статистика -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card text-center bg-warning text-white stat-card animate-on-scroll">
+                        <div class="card-body">
+                            <h3>{{ pending_count }}</h3>
+                            <p class="mb-0">Ожидают ответа</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center bg-info text-white stat-card animate-on-scroll">
+                        <div class="card-body">
+                            <h3>{{ accepted_count }}</h3>
+                            <p class="mb-0">В работе</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center bg-success text-white stat-card animate-on-scroll">
+                        <div class="card-body">
+                            <h3>{{ completed_count }}</h3>
+                            <p class="mb-0">Завершено</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center bg-danger text-white stat-card animate-on-scroll">
+                        <div class="card-body">
+                            <h3>{{ overdue_count }}</h3>
+                            <p class="mb-0">Просрочено</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Назначения -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Мои назначения</h5>
+                </div>
+                <div class="card-body">
+                    {% if assignments %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID подачи</th>
+                                        <th>Название</th>
+                                        <th>Статус</th>
+                                        <th>Дедлайн</th>
+                                        <th>Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for assignment in assignments %}
+                                    <tr {% if assignment.is_overdue %}class="table-danger"{% endif %}>
+                                        <td><strong>{{ assignment.submission.submission_id }}</strong></td>
+                                        <td>{{ assignment.submission.title_ru|truncatewords:8 }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ assignment.status|default:'secondary' }}">
+                                                {{ assignment.get_status_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if assignment.review_due %}
+                                                {{ assignment.review_due|date:"d.m.Y" }}
+                                                {% if assignment.is_overdue %}
+                                                    <span class="badge bg-danger">Просрочено</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="text-muted">Не указан</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'reviews:review_assignment_detail' assignment.pk %}" 
+                                               class="btn btn-sm btn-primary">
+                                                {% if assignment.status == 'pending' %}
+                                                    Просмотреть
+                                                {% elif assignment.status == 'accepted' %}
+                                                    Выполнить рецензию
+                                                {% else %}
+                                                    Просмотр
+                                                {% endif %}
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            У вас нет назначений на рецензирование
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

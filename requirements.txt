@@ -1,0 +1,11 @@
+Django>=4.2
+psycopg2-binary
+dj-database-url
+djangorestframework
+django-allauth
+django-modeltranslation
+Pillow
+django-crispy-forms
+crispy-bootstrap5
+gunicorn
+python-dotenv 

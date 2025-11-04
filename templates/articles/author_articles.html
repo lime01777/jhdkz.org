@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+
+{% block title %}Статьи автора {{ author.get_full_name }} - Journal of Health Development{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Главная</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'articles:article_list' %}">Статьи</a></li>
+                <li class="breadcrumb-item active">{{ author.get_full_name }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h1 class="card-title">
+                    <i class="fas fa-user"></i> {{ author.get_full_name }}
+                </h1>
+                
+                <div class="author-info mb-4">
+                    {% if author.organization %}
+                    <p class="text-muted">
+                        <i class="fas fa-building"></i> <strong>Организация:</strong> {{ author.organization }}
+                    </p>
+                    {% endif %}
+                    
+                    {% if author.orcid %}
+                    <p class="text-muted">
+                        <i class="fas fa-id-card"></i> <strong>ORCID:</strong> {{ author.orcid }}
+                    </p>
+                    {% endif %}
+                    
+                    {% if author.bio %}
+                    <p class="text-muted">
+                        <i class="fas fa-info-circle"></i> <strong>Биография:</strong> {{ author.bio }}
+                    </p>
+                    {% endif %}
+                </div>
+                
+                <h3>Статьи автора ({{ articles|length }})</h3>
+            </div>
+        </div>
+        
+        {% if articles %}
+        <div class="row">
+            {% for article in articles %}
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 article-card">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <a href="{% url 'articles:article_detail' article.pk %}" class="text-decoration-none">
+                                {{ article.get_title }}
+                            </a>
+                        </h5>
+                        <p class="card-text text-muted">
+                            <i class="fas fa-book"></i> {{ article.issue.get_title }}
+                        </p>
+                        <p class="card-text">
+                            {{ article.get_abstract|truncatewords:30 }}
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar"></i> {{ article.created_at|date:"d.m.Y" }}
+                                <i class="fas fa-eye ms-2"></i> {{ article.views }}
+                                <i class="fas fa-download ms-2"></i> {{ article.downloads }}
+                            </small>
+                            <div class="btn-group">
+                                <a href="{% url 'articles:article_detail' article.pk %}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-eye"></i> Читать
+                                </a>
+                                {% if article.pdf_file %}
+                                <a href="{{ article.pdf_file.url }}" class="btn btn-sm btn-outline-secondary" target="_blank">
+                                    <i class="fas fa-download"></i> PDF
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> У этого автора пока нет опубликованных статей.
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="col-md-4">
+        <!-- Информация об авторе -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-user"></i> Информация об авторе</h5>
+            </div>
+            <div class="card-body">
+                <h6>{{ author.get_full_name }}</h6>
+                {% if author.organization %}
+                <p class="text-muted mb-2">{{ author.organization }}</p>
+                {% endif %}
+                {% if author.orcid %}
+                <p class="text-muted mb-2">
+                    <i class="fas fa-id-card"></i> ORCID: {{ author.orcid }}
+                </p>
+                {% endif %}
+                {% if author.bio %}
+                <p class="text-muted mb-3">{{ author.bio|truncatewords:20 }}</p>
+                {% endif %}
+                <p class="text-muted">
+                    <i class="fas fa-newspaper"></i> Статей: {{ articles|length }}
+                </p>
+            </div>
+        </div>
+        
+        <!-- Статистика автора -->
+        {% if articles %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Статистика</h5>
+            </div>
+            <div class="card-body">
+                {% with total_views=articles|length %}
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h4 class="text-primary">{{ articles|length }}</h4>
+                        <p class="text-muted">Статей</p>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-success">
+                            {% with total_views=articles|length %}
+                                {% for article in articles %}
+                                    {% if forloop.first %}
+                                        {{ article.views }}
+                                    {% else %}
+                                        {% if forloop.last %}
+                                            {{ total_views|add:article.views }}
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            {% endwith %}
+                        </h4>
+                        <p class="text-muted">Просмотров</p>
+                    </div>
+                </div>
+                {% endwith %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Другие авторы -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-users"></i> Другие авторы</h5>
+            </div>
+            <div class="card-body">
+                {% for other_author in other_authors %}
+                <div class="other-author-item mb-3 pb-3 border-bottom">
+                    <h6>
+                        <a href="{% url 'articles:author_articles' other_author.id %}" class="text-decoration-none">
+                            {{ other_author.get_full_name }}
+                        </a>
+                    </h6>
+                    {% if other_author.organization %}
+                    <small class="text-muted">{{ other_author.organization }}</small>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

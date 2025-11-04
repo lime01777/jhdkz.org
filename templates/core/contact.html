@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Контакты - Journal of Health Development{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-envelope"></i> Контакты
+        </h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-paper-plane"></i> Отправить сообщение</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="name" class="form-label">Имя *</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">Email *</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="subject" class="form-label">Тема *</label>
+                        <input type="text" class="form-control" id="subject" name="subject" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Сообщение *</label>
+                        <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-send"></i> Отправить сообщение
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-map-marker-alt"></i> Адрес</h5>
+            </div>
+            <div class="card-body">
+                <p>
+                    <strong>Journal of Health Development</strong><br>
+                    Астана, Казахстан<br>
+                    [Полный адрес редакции]
+                </p>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-phone"></i> Телефоны</h5>
+            </div>
+            <div class="card-body">
+                <p>
+                    <strong>Редакция:</strong><br>
+                    +7 (XXX) XXX-XX-XX<br>
+                    <strong>Факс:</strong><br>
+                    +7 (XXX) XXX-XX-XX
+                </p>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-envelope"></i> Email</h5>
+            </div>
+            <div class="card-body">
+                <p>
+                    <strong>Общие вопросы:</strong><br>
+                    <a href="mailto:info@jhdkz.org">info@jhdkz.org</a><br><br>
+                    <strong>Редакция:</strong><br>
+                    <a href="mailto:editor@jhdkz.org">editor@jhdkz.org</a><br><br>
+                    <strong>Техническая поддержка:</strong><br>
+                    <a href="mailto:support@jhdkz.org">support@jhdkz.org</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

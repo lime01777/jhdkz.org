@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Поиск</h1>
+<form method="get" action="/search/">
+  <input type="text" name="q" value="{{ query }}" placeholder="Поиск...">
+  <button type="submit">Искать</button>
+  <a href="/api/search?q={{ query|urlencode }}" target="_blank">API</a>
+  <hr>
+</form>
+{% if query %}
+  <p>Результаты по запросу: <strong>{{ query }}</strong></p>
+  <ul>
+  {% for item in results %}
+    <li>
+      <a href="{{ item.url }}">[{{ item.type }}] {{ item.title }}</a>
+    </li>
+  {% empty %}
+    <li>Ничего не найдено</li>
+  {% endfor %}
+  </ul>
+{% endif %}
+{% endblock %}
+
+

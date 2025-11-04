@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %}Проверка и отправка - Шаг 5{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="mb-4">Предварительный просмотр и отправка</h1>
+            
+            <!-- Прогресс -->
+            <div class="progress mb-4" style="height: 30px;">
+                <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" 
+                     style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+                    Шаг 5 из 5: Отправка
+                </div>
+            </div>
+            
+            {% if not can_submit %}
+                <div class="alert alert-warning">
+                    <h5><i class="bi bi-exclamation-triangle"></i> Статья не готова к отправке</h5>
+                    <p>Необходимо исправить следующие проблемы:</p>
+                    <ul>
+                        {% for issue in issues %}
+                            <li>{{ issue }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+            
+            <!-- Предварительный просмотр -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Информация о подаче</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <tr>
+                            <th width="200">ID подачи:</th>
+                            <td><strong>{{ submission.submission_id }}</strong></td>
+                        </tr>
+                        <tr>
+                            <th>Название:</th>
+                            <td>{{ submission.title_ru|default:"Не указано" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Раздел:</th>
+                            <td>{{ submission.section.title_ru|default:"Не выбран" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Язык:</th>
+                            <td>{{ submission.get_language_display }}</td>
+                        </tr>
+                        <tr>
+                            <th>Корреспондирующий автор:</th>
+                            <td>{{ submission.corresponding_author.get_full_name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Файлов загружено:</th>
+                            <td>{{ submission.files.count|default:0 }}</td>
+                        </tr>
+                        <tr>
+                            <th>Статус:</th>
+                            <td><span class="badge bg-secondary">{{ submission.get_status_display_ru }}</span></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Форма отправки -->
+            {% if can_submit %}
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="bi bi-check-circle"></i> Статья готова к отправке</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Проверьте всю информацию перед отправкой. После отправки вы не сможете редактировать статью самостоятельно.</p>
+                        
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="confirm" required>
+                                <label class="form-check-label" for="confirm">
+                                    Я подтверждаю, что вся информация верна и статья готова к рецензированию
+                                </label>
+                            </div>
+                            <button type="submit" name="submit" class="btn btn-success btn-lg">
+                                <i class="bi bi-send"></i> Отправить статью
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% else %}
+                <div class="card">
+                    <div class="card-body">
+                        <a href="{% url 'submissions:detail' submission.pk %}" class="btn btn-primary">
+                            Редактировать подачу
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+            
+            <div class="mt-3">
+                <a href="{% url 'submissions:step4' submission.pk %}" class="btn btn-secondary">← Назад</a>
+                <a href="{% url 'submissions:list' %}" class="btn btn-outline-secondary">Сохранить как черновик</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Автор: {{ author.get_full_name }}</h1>
+<p>Профиль: {{ author.username }}</p>
+<h2>Статьи</h2>
+<ul>
+  {% for a in articles %}
+    <li><a href="/articles/{{ a.pk }}/">{{ a.get_title }}</a></li>
+  {% empty %}
+    <li>Нет статей</li>
+  {% endfor %}
+  </ul>
+{% endblock %}
+
+
