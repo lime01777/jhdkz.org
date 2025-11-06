@@ -1,12 +1,31 @@
+"""
+Базовые настройки Django проекта jhdkz_portal.
+Общие настройки для dev и prod окружений.
+"""
+import os
 from pathlib import Path
+import environ
 
 # PROJECT_DIR = каталог 'jhdkz_portal', BASE_DIR = корень репозитория
 PROJECT_DIR = Path(__file__).resolve().parent.parent
 BASE_DIR = PROJECT_DIR.parent
 
-SECRET_KEY = 'change-me'
-DEBUG = False
-ALLOWED_HOSTS = []
+# Инициализация django-environ
+env = environ.Env(
+    # Устанавливаем значения по умолчанию для переменных окружения
+    DEBUG=(bool, False),
+    ALLOWED_HOSTS=(list, []),
+)
+
+# Читаем .env файл из корня проекта
+env_path = env.str('ENV_PATH', default=str(BASE_DIR / '.env'))
+if os.path.exists(env_path):
+    environ.Env.read_env(env_path)
+
+# Базовые настройки безопасности
+SECRET_KEY = env.str('SECRET_KEY', default='change-me-in-production')
+DEBUG = env.bool('DEBUG', default=False)
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -38,6 +57,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'core.middleware.RedirectMiddleware',  # Обработка редиректов старых URL
 ]
 
 ROOT_URLCONF = 'jhdkz_portal.urls'
@@ -59,11 +79,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'jhdkz_portal.wsgi.application'
 
+# База данных: по умолчанию SQLite для dev, можно переопределить через DATABASE_URL
+# В prod.py будет использоваться DATABASE_URL для Postgres
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': str(BASE_DIR / 'db.sqlite3'),  # Явно преобразуем Path в строку
-    }
+    'default': env.db(
+        'DATABASE_URL',
+        default=f'sqlite:///{BASE_DIR / "db.sqlite3"}'
+    )
 }
 
 LANGUAGE_CODE = 'ru'
@@ -81,14 +103,15 @@ LOCALE_PATHS = [
     BASE_DIR / 'locale',
 ]
 
+# Статические и медиа файлы
 STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_ROOT = env.str('STATIC_ROOT', default=str(BASE_DIR / 'staticfiles'))
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
 MEDIA_URL = 'media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = env.str('MEDIA_ROOT', default=str(BASE_DIR / 'media'))
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -108,11 +131,42 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 20,
 }
 
-# Безопасность (заготовки)
+# Настройки безопасности (базовые, переопределяются в prod.py)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_SSL_REDIRECT = False
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
 USE_X_FORWARDED_HOST = True
+
+# Логирование
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': env.str('DJANGO_LOG_LEVEL', default='INFO'),
+            'propagate': False,
+        },
+        'etl': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
 
 

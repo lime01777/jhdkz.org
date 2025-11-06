@@ -16,4 +16,4 @@ urlpatterns = [
     path('editor/', views.EditorDashboardView.as_view(), name='editor_dashboard'),
     path('editor/authors/', views.EditorAuthorListView.as_view(), name='editor_authors'),
     path('editor/authors/<int:pk>/', views.EditorAuthorUpdateView.as_view(), name='editor_author_edit'),
-] 
+]

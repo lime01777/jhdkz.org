@@ -74,4 +74,4 @@ class AuthorRegistrationForm(UserCreationForm):
             # Простая проверка формата ORCID
             if not orcid.replace('-', '').isdigit() or len(orcid.replace('-', '')) != 16:
                 raise forms.ValidationError('ORCID должен быть в формате 0000-0000-0000-0000')
-        return orcid 
+        return orcid

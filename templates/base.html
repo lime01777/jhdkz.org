@@ -299,6 +299,23 @@
         .nav-link.active::after {
             width: 80%;
         }
+        
+        /* Эффект волны при клике на кнопку */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            transform: scale(0);
+            animation: ripple-animation 0.6s ease-out;
+            pointer-events: none;
+        }
+        
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
     </style>
     
     <!-- JavaScript для динамических анимаций -->
@@ -374,30 +391,6 @@
             });
         });
     </script>
-    
-    <style>
-        /* Эффект волны при клике на кнопку */
-        .btn {
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .ripple {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.6);
-            transform: scale(0);
-            animation: ripple-animation 0.6s ease-out;
-            pointer-events: none;
-        }
-        
-        @keyframes ripple-animation {
-            to {
-                transform: scale(4);
-                opacity: 0;
-            }
-        }
-    </style>
     
     {% block extra_css %}{% endblock %}
 </head>

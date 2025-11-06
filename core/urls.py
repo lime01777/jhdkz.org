@@ -22,7 +22,7 @@ urlpatterns = [
     # Авторы
     path('authors/<slug:slug>/', views.author_detail, name='author_detail'),
 
-    # Файлы (заглушка)
+    # Файлы
     path('files/<int:pk>/download/', views.file_download, name='file_download'),
 
     # Поиск
@@ -38,4 +38,4 @@ urlpatterns = [
     
     # Статические страницы
     path('<slug:slug>/', views.PageDetailView.as_view(), name='page_detail'),
-] 
+]

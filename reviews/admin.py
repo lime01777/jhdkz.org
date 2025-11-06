@@ -8,7 +8,7 @@ class ReviewAdmin(admin.ModelAdmin):
     
     list_display = ('submission', 'reviewer', 'status', 'average_score', 'recommendation', 'assigned_at')
     list_filter = ('status', 'recommendation', 'is_anonymous', 'conflict_of_interest', 'assigned_at')
-    search_fields = ('submission__title', 'reviewer__full_name', 'reviewer__username')
+    search_fields = ('submission__title_ru', 'submission__submission_id', 'reviewer__full_name', 'reviewer__username')
     ordering = ('-assigned_at',)
     
     # Поля только для чтения

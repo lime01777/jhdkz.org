@@ -30,7 +30,7 @@ class ArticleSitemap(Sitemap):
             return []
 
     def location(self, obj):
-        return f"/articles/{obj.pk}/"
+        return f"/articles/{obj.slug}/" if hasattr(obj, 'slug') and obj.slug else f"/articles/{obj.pk}/"
 
 
 class IssueSitemap(Sitemap):

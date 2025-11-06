@@ -44,10 +44,31 @@ class ArticleListView(ListView):
         return context
 
 class ArticleDetailView(DetailView):
-    """Детальная страница статьи."""
+    """Детальная страница статьи. Поддерживает поиск по slug или pk."""
     model = Article
     template_name = 'articles/article_detail.html'
     context_object_name = 'article'
+    slug_url_kwarg = 'slug'
+    slug_field = 'slug'
+    pk_url_kwarg = 'pk'
+    
+    def get_object(self, queryset=None):
+        """Получает объект по slug или pk."""
+        if queryset is None:
+            queryset = self.get_queryset()
+        
+        slug = self.kwargs.get('slug')
+        pk = self.kwargs.get('pk')
+        
+        if slug:
+            queryset = queryset.filter(slug=slug)
+        elif pk:
+            queryset = queryset.filter(pk=pk)
+        else:
+            raise AttributeError("ArticleDetailView должен получать slug или pk")
+        
+        obj = get_object_or_404(queryset)
+        return obj
     
     def get_queryset(self):
         """Показываем опубликованные статьи всем, свои статьи - авторам в любом статусе."""
@@ -184,6 +205,7 @@ def author_articles(request, author_id):
         'articles': articles,
     }
     return render(request, 'articles/author_articles.html', context)
+
 
 class ArticleCreateView(LoginRequiredMixin, CreateView):
     """Создание новой статьи автором."""

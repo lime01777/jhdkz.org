@@ -2,8 +2,7 @@
 URL configuration for jhdkz_portal project.
 """
 from django.contrib import admin
-from django.urls import path, include
-from django.urls import reverse_lazy
+from django.urls import path, include, reverse_lazy
 from django.views.generic import RedirectView
 from django.conf import settings
 from django.conf.urls.static import static
@@ -13,7 +12,7 @@ urlpatterns = [
     # Совместимость: после логина некоторые сборки редиректят на /accounts/profile/
     path('accounts/profile/', RedirectView.as_view(url=reverse_lazy('users:dashboard'), permanent=False)),
     path('issues/', include('issues.urls')),
-    path('articles/', include('articles.urls')),git
+    path('articles/', include('articles.urls')),
     path('users/', include('users.urls')),
     path('submissions/', include('submissions.urls')),  # OJS submission system
     path('reviews/', include('reviews.urls')),  # OJS review system

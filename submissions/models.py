@@ -183,7 +183,7 @@ class Submission(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.title} - {self.corresponding_author.get_full_name()}"
+        return f"{self.get_title('ru')} - {self.corresponding_author.get_full_name()}"
     
     def save(self, *args, **kwargs):
         """Генерирует уникальный ID отправки при создании."""
@@ -195,12 +195,12 @@ class Submission(models.Model):
     @property
     def is_submitted(self):
         """Проверяет, отправлена ли статья."""
-        return self.status in ['submitted', 'under_review', 'revision_requested', 'accepted', 'published']
+        return self.status in ['submitted', 'reviewing', 'revision_requested', 'accepted', 'published']
     
     @property
     def is_under_review(self):
         """Проверяет, находится ли статья на рецензии."""
-        return self.status == 'under_review'
+        return self.status in ['reviewing', 'reviewer_assigned']
     
     @property
     def is_accepted(self):

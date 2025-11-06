@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.views.generic import ListView, DetailView, TemplateView
 from django.db.models import Sum, Count, Q
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, FileResponse, Http404
 from django.conf import settings
 from .models import SiteSettings, News, Page
 from issues.models import Issue
@@ -10,6 +10,10 @@ from articles.models import Article
 from users.models import User
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from django.db import connection
+from articles.models_extended import ArticleFile
+from core.models_extended import Event
+import os
+
 
 def home(request):
     """Главная страница."""
@@ -128,9 +132,39 @@ def author_detail(request, slug):
 
 
 def file_download(request, pk):
-    """Заглушка скачивания файла по pk. Возвращает 404 до появления модели File.
     """
-    return HttpResponse("Файл не найден", status=404)
+    Скачивание файла по pk.
+    Поддерживает файлы из ArticleFile и других источников.
+    """
+    try:
+        file_obj = ArticleFile.objects.get(pk=pk)
+        
+        # Логируем событие загрузки
+        Event.objects.create(
+            object_type='file',
+            object_id=file_obj.pk,
+            kind='download',
+            ip=request.META.get('REMOTE_ADDR'),
+            user_agent=request.META.get('HTTP_USER_AGENT', '')[:500],
+        )
+        
+        # Увеличиваем счетчик загрузок у статьи
+        if file_obj.article:
+            file_obj.article.increment_downloads()
+        
+        # Отдаем файл
+        if not os.path.exists(file_obj.file.path):
+            raise Http404("Файл не найден на диске")
+        
+        response = FileResponse(
+            open(file_obj.file.path, 'rb'),
+            content_type=file_obj.content_type or 'application/octet-stream'
+        )
+        response['Content-Disposition'] = f'attachment; filename="{file_obj.original_name}"'
+        return response
+    
+    except ArticleFile.DoesNotExist:
+        raise Http404("Файл не найден")
 
 
 def robots_txt(request):
@@ -154,7 +188,11 @@ def search_page(request):
         )[:20]
         news_qs = News.objects.filter(Q(title__icontains=q) | Q(content__icontains=q))[:20]
         results.extend([
-            {"type": "article", "title": a.get_title('ru'), "url": f"/articles/{a.pk}/"}
+            {
+                "type": "article",
+                "title": a.get_title('ru'),
+                "url": f"/articles/{a.slug}/" if hasattr(a, 'slug') and a.slug else f"/articles/{a.pk}/"
+            }
             for a in articles_qs
         ])
         results.extend([
@@ -189,8 +227,12 @@ def api_search(request):
                 items.append({
                     "type": "article",
                     "title": a.get_title('ru'),
-                    "url": f"/articles/{a.pk}/",
-                    "snippet": a.get_abstract('ru')[:200]
+                    "url": f"/articles/{a.slug}/" if hasattr(a, 'slug') and a.slug else f"/articles/{a.pk}/",
+                    "snippet": a.get_abstract('ru')[:200],
+                    "issue": {
+                        "year": a.issue.year if a.issue else None,
+                        "number": a.issue.number if a.issue else None,
+                    }
                 })
         except Exception:
             # Fallback на icontains
@@ -200,12 +242,16 @@ def api_search(request):
         # Fallback: icontains статьи и новости
         for a in Article.objects.filter(
             Q(title_ru__icontains=q) | Q(abstract_ru__icontains=q), status='published'
-        )[:20]:
+        ).select_related('issue')[:20]:
             items.append({
                 "type": "article",
                 "title": a.get_title('ru'),
-                "url": f"/articles/{a.pk}/",
-                "snippet": a.get_abstract('ru')[:200]
+                "url": f"/articles/{a.slug}/" if hasattr(a, 'slug') and a.slug else f"/articles/{a.pk}/",
+                "snippet": a.get_abstract('ru')[:200],
+                "issue": {
+                    "year": a.issue.year if a.issue else None,
+                    "number": a.issue.number if a.issue else None,
+                }
             })
         for n in News.objects.filter(Q(title__icontains=q) | Q(content__icontains=q))[:20]:
             items.append({

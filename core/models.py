@@ -1,6 +1,5 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from django.urls import reverse
 
 class SiteSettings(models.Model):
     """
@@ -135,22 +134,35 @@ class News(models.Model):
 
 
 class Redirect(models.Model):
-    """Простая модель редиректов. Используется для миграции старых URL.
-    TODO: при наличии django.contrib.redirects можно заменить на стандартную.
     """
-    old_url = models.CharField("Старый URL", max_length=500, unique=True)
-    new_path = models.CharField("Новый путь", max_length=500)
-    is_active = models.BooleanField("Активен", default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    Модель редиректов для миграции старых OJS URL на новые.
+    Поддерживает 301 (постоянный) и 302 (временный) редиректы.
+    """
+    old_url = models.URLField("Старый URL", max_length=1000, unique=True, db_index=True)
+    new_path = models.CharField("Новый путь", max_length=500, db_index=True)
+    http_status = models.SmallIntegerField(
+        "HTTP статус",
+        choices=[
+            (301, '301 - Постоянный редирект'),
+            (302, '302 - Временный редирект'),
+        ],
+        default=301,
+        help_text="301 рекомендуется для SEO"
+    )
+    is_active = models.BooleanField("Активен", default=True, db_index=True)
+    created_at = models.DateTimeField("Дата создания", auto_now_add=True)
+    updated_at = models.DateTimeField("Дата обновления", auto_now=True)
 
     class Meta:
         verbose_name = "Редирект"
         verbose_name_plural = "Редиректы"
         ordering = ['-updated_at']
+        indexes = [
+            models.Index(fields=['old_url', 'is_active']),
+        ]
 
     def __str__(self):
-        return f"{self.old_url} -> {self.new_path}"
+        return f"{self.old_url} -> {self.new_path} ({self.http_status})"
 
     def get_absolute_url(self):
         return self.new_path
@@ -241,3 +253,6 @@ class EditorialTeam(models.Model):
     def is_section_editor(self):
         """Проверяет, является ли редактором раздела."""
         return self.role == 'section_editor'
+
+
+# Расширенные модели будут импортированы через __init__.py

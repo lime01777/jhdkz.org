@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from .models import SiteSettings, Page, Contact, News, Redirect, EditorialTeam
+from .models_extended import NewsLocale, PageLocale, Event, RawDocument, Affiliation
 
 @admin.register(SiteSettings)
 class SiteSettingsAdmin(admin.ModelAdmin):
@@ -162,9 +163,21 @@ class NewsAdmin(admin.ModelAdmin):
 
 @admin.register(Redirect)
 class RedirectAdmin(admin.ModelAdmin):
-    list_display = ("old_url", "new_path", "is_active", "updated_at")
-    list_filter = ("is_active",)
+    """Админка для редиректов."""
+    list_display = ("old_url", "new_path", "http_status", "is_active", "updated_at")
+    list_filter = ("is_active", "http_status")
     search_fields = ("old_url", "new_path")
+    ordering = ("-updated_at",)
+    readonly_fields = ("created_at", "updated_at")
+    
+    fieldsets = (
+        (_('Основная информация'), {
+            'fields': ('old_url', 'new_path', 'http_status', 'is_active')
+        }),
+        (_('Даты'), {
+            'fields': ('created_at', 'updated_at')
+        }),
+    )
 
 
 @admin.register(EditorialTeam)
@@ -192,3 +205,52 @@ class EditorialTeamAdmin(admin.ModelAdmin):
     )
     
     readonly_fields = ('created_at', 'updated_at')
+
+
+@admin.register(NewsLocale)
+class NewsLocaleAdmin(admin.ModelAdmin):
+    """Админка для локализаций новостей."""
+    list_display = ('news', 'language', 'title', 'updated_at')
+    list_filter = ('language',)
+    search_fields = ('news__title', 'title', 'body_html')
+    ordering = ('news', 'language')
+
+
+@admin.register(PageLocale)
+class PageLocaleAdmin(admin.ModelAdmin):
+    """Админка для локализаций страниц."""
+    list_display = ('page', 'language', 'title', 'updated_at')
+    list_filter = ('language',)
+    search_fields = ('page__title', 'title', 'body_html')
+    ordering = ('page', 'language')
+
+
+@admin.register(Event)
+class EventAdmin(admin.ModelAdmin):
+    """Админка для событий."""
+    list_display = ('object_type', 'object_id', 'kind', 'ip', 'timestamp')
+    list_filter = ('object_type', 'kind', 'timestamp')
+    search_fields = ('ip', 'user_agent')
+    ordering = ('-timestamp',)
+    readonly_fields = ('timestamp',)
+    date_hierarchy = 'timestamp'
+
+
+@admin.register(RawDocument)
+class RawDocumentAdmin(admin.ModelAdmin):
+    """Админка для сырых документов ETL."""
+    list_display = ('source_url', 'sha256', 'fetched_at')
+    list_filter = ('fetched_at',)
+    search_fields = ('source_url', 'sha256')
+    ordering = ('-fetched_at',)
+    readonly_fields = ('sha256', 'fetched_at')
+    date_hierarchy = 'fetched_at'
+
+
+@admin.register(Affiliation)
+class AffiliationAdmin(admin.ModelAdmin):
+    """Админка для аффилиаций."""
+    list_display = ('name', 'country', 'city', 'created_at')
+    list_filter = ('country',)
+    search_fields = ('name', 'name_en', 'country', 'city')
+    ordering = ('name',)

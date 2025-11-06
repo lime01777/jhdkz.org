@@ -1,7 +1,19 @@
+"""
+Настройки для разработки (development).
+Переопределяет базовые настройки для локальной разработки.
+"""
 from .base import *  # noqa
 
 DEBUG = True
 ALLOWED_HOSTS = ['*']
+
+# База данных для разработки - SQLite
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
 
 # Настройки аутентификации для разработки
 LOGIN_URL = 'login'

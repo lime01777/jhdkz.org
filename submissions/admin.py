@@ -57,7 +57,7 @@ class SubmissionAdmin(admin.ModelAdmin):
     
     def send_to_review(self, request, queryset):
         """Отправить на рецензирование."""
-        updated = queryset.update(status='under_review')
+        updated = queryset.update(status='reviewing')
         self.message_user(request, f'{updated} рукописей отправлено на рецензирование.')
     send_to_review.short_description = "Отправить на рецензирование"
     
