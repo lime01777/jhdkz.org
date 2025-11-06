@@ -1,20 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
-<<<<<<< HEAD
-
-User = get_user_model()
-
-class Submission(models.Model):
-    """
-    Модель отправки статьи.
-    Управляет процессом подачи и рецензирования статей.
-    """
-    # Основная информация
-    title = models.CharField("Название статьи", max_length=500)
-    abstract = models.TextField("Аннотация")
-    keywords = models.CharField("Ключевые слова", max_length=500)
-=======
 from django.core.validators import FileExtensionValidator
 
 User = get_user_model()
@@ -78,7 +64,6 @@ class Submission(models.Model):
         null=True,
         blank=True
     )
->>>>>>> bebf4c4 (initial commit)
     
     # Авторы
     corresponding_author = models.ForeignKey(
@@ -94,28 +79,6 @@ class Submission(models.Model):
         blank=True
     )
     
-<<<<<<< HEAD
-    # Файлы
-    manuscript_file = models.FileField("Рукопись", upload_to='submissions/manuscripts/')
-    supplementary_files = models.FileField(
-        "Дополнительные файлы", 
-        upload_to='submissions/supplementary/',
-        blank=True,
-        null=True
-    )
-    
-    # Статус и workflow
-    STATUS_CHOICES = [
-        ('draft', 'Черновик'),
-        ('submitted', 'Отправлена'),
-        ('under_review', 'На рецензии'),
-        ('revision_requested', 'Требуются исправления'),
-        ('accepted', 'Принята'),
-        ('rejected', 'Отклонена'),
-        ('published', 'Опубликована'),
-    ]
-    status = models.CharField("Статус", max_length=20, choices=STATUS_CHOICES, default='draft')
-=======
     # Файлы - OJS поддерживает несколько версий
     manuscript_file = models.FileField(
         "Рукопись", 
@@ -161,18 +124,12 @@ class Submission(models.Model):
         ('double', 'Двойное слепое'),
         ('open', 'Открытое'),
     ], default='double')
->>>>>>> bebf4c4 (initial commit)
     
     # Даты
     submitted_at = models.DateTimeField("Дата отправки", null=True, blank=True)
     updated_at = models.DateTimeField("Дата обновления", auto_now=True)
     created_at = models.DateTimeField("Дата создания", auto_now_add=True)
     
-<<<<<<< HEAD
-    # Комментарии
-    author_comments = models.TextField("Комментарии автора", blank=True)
-    editor_comments = models.TextField("Комментарии редактора", blank=True)
-=======
     # Комментарии на разных этапах
     author_comments = models.TextField("Комментарии автора редактору", blank=True)
     editor_comments = models.TextField("Комментарии редактора автору", blank=True)
@@ -206,7 +163,6 @@ class Submission(models.Model):
         null=True,
         blank=True
     )
->>>>>>> bebf4c4 (initial commit)
     
     # Техническая информация
     submission_id = models.CharField("ID отправки", max_length=20, unique=True, blank=True)
@@ -216,21 +172,18 @@ class Submission(models.Model):
         ('en', 'Английский'),
     ])
     
-<<<<<<< HEAD
-=======
     # Дополнительные даты OJS
     last_review_date = models.DateTimeField("Дата последней рецензии", null=True, blank=True)
     last_revision_date = models.DateTimeField("Дата последних исправлений", null=True, blank=True)
     editor_decision_date = models.DateTimeField("Дата решения редактора", null=True, blank=True)
     
->>>>>>> bebf4c4 (initial commit)
     class Meta:
         verbose_name = "Отправка"
         verbose_name_plural = "Отправки"
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.title} - {self.corresponding_author.get_full_name()}"
+        return f"{self.get_title('ru')} - {self.corresponding_author.get_full_name()}"
     
     def save(self, *args, **kwargs):
         """Генерирует уникальный ID отправки при создании."""
@@ -242,12 +195,12 @@ class Submission(models.Model):
     @property
     def is_submitted(self):
         """Проверяет, отправлена ли статья."""
-        return self.status in ['submitted', 'under_review', 'revision_requested', 'accepted', 'published']
+        return self.status in ['submitted', 'reviewing', 'revision_requested', 'accepted', 'published']
     
     @property
     def is_under_review(self):
         """Проверяет, находится ли статья на рецензии."""
-        return self.status == 'under_review'
+        return self.status in ['reviewing', 'reviewer_assigned']
     
     @property
     def is_accepted(self):
@@ -265,8 +218,6 @@ class Submission(models.Model):
         authors.extend(self.co_authors.all())
         return authors
     
-<<<<<<< HEAD
-=======
     def get_title(self, language='ru'):
         """Возвращает название на указанном языке."""
         title_map = {
@@ -294,21 +245,10 @@ class Submission(models.Model):
         }
         return keywords_map.get(language, self.keywords_ru) or self.keywords_ru
     
->>>>>>> bebf4c4 (initial commit)
     def get_status_display_ru(self):
         """Возвращает статус на русском языке."""
         status_map = {
             'draft': 'Черновик',
-<<<<<<< HEAD
-            'submitted': 'Отправлена',
-            'under_review': 'На рецензии',
-            'revision_requested': 'Требуются исправления',
-            'accepted': 'Принята',
-            'rejected': 'Отклонена',
-            'published': 'Опубликована',
-        }
-        return status_map.get(self.status, self.status)
-=======
             'submitted': 'Отправлена редактору',
             'reviewing': 'На рецензии',
             'in_editing': 'В редактировании',
@@ -441,4 +381,3 @@ class SubmissionAuthor(models.Model):
     def __str__(self):
         role = " (корреспондирующий)" if self.is_corresponding else ""
         return f"{self.author.get_full_name()}{role}"
->>>>>>> bebf4c4 (initial commit)

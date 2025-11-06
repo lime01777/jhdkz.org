@@ -1,14 +1,7 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
-<<<<<<< HEAD
-from .models import SiteSettings, Page, Contact, News
-=======
 from .models import SiteSettings, Page, Contact, News, Redirect, EditorialTeam
-<<<<<<< HEAD
->>>>>>> bebf4c4 (initial commit)
-=======
 from .models_extended import NewsLocale, PageLocale, Event, RawDocument, Affiliation
->>>>>>> 84465c9 (Fix function OJS system)
 
 @admin.register(SiteSettings)
 class SiteSettingsAdmin(admin.ModelAdmin):
@@ -166,8 +159,6 @@ class NewsAdmin(admin.ModelAdmin):
         updated = queryset.update(is_featured=False)
         self.message_user(request, f'{updated} новостей убрано из рекомендуемых.')
     unfeature_news.short_description = "Убрать из рекомендуемых"
-<<<<<<< HEAD
-=======
 
 
 @admin.register(Redirect)
@@ -214,9 +205,6 @@ class EditorialTeamAdmin(admin.ModelAdmin):
     )
     
     readonly_fields = ('created_at', 'updated_at')
-<<<<<<< HEAD
->>>>>>> bebf4c4 (initial commit)
-=======
 
 
 @admin.register(NewsLocale)
@@ -266,4 +254,3 @@ class AffiliationAdmin(admin.ModelAdmin):
     list_filter = ('country',)
     search_fields = ('name', 'name_en', 'country', 'city')
     ordering = ('name',)
->>>>>>> 84465c9 (Fix function OJS system)

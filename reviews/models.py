@@ -1,19 +1,11 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
-<<<<<<< HEAD
-=======
 from django.core.validators import FileExtensionValidator
->>>>>>> bebf4c4 (initial commit)
 from submissions.models import Submission
 
 User = get_user_model()
 
-<<<<<<< HEAD
-class Review(models.Model):
-    """
-    Модель рецензии статьи.
-=======
 
 class ReviewAssignment(models.Model):
     """
@@ -116,7 +108,6 @@ class ReviewAssignment(models.Model):
 class Review(models.Model):
     """
     Модель рецензии статьи (полный OJS-style review).
->>>>>>> bebf4c4 (initial commit)
     Содержит оценку, комментарии и рекомендации рецензента.
     """
     # Связи
@@ -133,9 +124,6 @@ class Review(models.Model):
         verbose_name="Рецензент"
     )
     
-<<<<<<< HEAD
-    # Оценки (по шкале 1-5)
-=======
     # Связь с назначением
     assignment = models.OneToOneField(
         'ReviewAssignment',
@@ -147,53 +135,33 @@ class Review(models.Model):
     )
     
     # Оценки (по шкале 1-5, nullable для частичного заполнения)
->>>>>>> bebf4c4 (initial commit)
     originality = models.PositiveSmallIntegerField("Оригинальность", choices=[
         (1, '1 - Низкая'),
         (2, '2 - Ниже среднего'),
         (3, '3 - Средняя'),
         (4, '4 - Выше среднего'),
         (5, '5 - Высокая'),
-<<<<<<< HEAD
-    ])
-=======
     ], null=True, blank=True)
->>>>>>> bebf4c4 (initial commit)
     scientific_value = models.PositiveSmallIntegerField("Научная ценность", choices=[
         (1, '1 - Низкая'),
         (2, '2 - Ниже среднего'),
         (3, '3 - Средняя'),
         (4, '4 - Выше среднего'),
         (5, '5 - Высокая'),
-<<<<<<< HEAD
-    ])
-=======
     ], null=True, blank=True)
->>>>>>> bebf4c4 (initial commit)
     methodology = models.PositiveSmallIntegerField("Методология", choices=[
         (1, '1 - Слабая'),
         (2, '2 - Ниже среднего'),
         (3, '3 - Средняя'),
         (4, '4 - Выше среднего'),
         (5, '5 - Сильная'),
-<<<<<<< HEAD
-    ])
-=======
     ], null=True, blank=True)
->>>>>>> bebf4c4 (initial commit)
     presentation = models.PositiveSmallIntegerField("Презентация", choices=[
         (1, '1 - Плохая'),
         (2, '2 - Ниже среднего'),
         (3, '3 - Средняя'),
         (4, '4 - Выше среднего'),
         (5, '5 - Отличная'),
-<<<<<<< HEAD
-    ])
-    
-    # Комментарии
-    comments_for_author = models.TextField("Комментарии для автора")
-    comments_for_editor = models.TextField("Комментарии для редактора", blank=True)
-=======
     ], null=True, blank=True)
     
     # Дополнительные критерии OJS
@@ -221,7 +189,6 @@ class Review(models.Model):
     strengths = models.TextField("Сильные стороны", blank=True)
     weaknesses = models.TextField("Слабые стороны", blank=True)
     suggestions = models.TextField("Рекомендации по улучшению", blank=True)
->>>>>>> bebf4c4 (initial commit)
     
     # Рекомендация
     RECOMMENDATION_CHOICES = [
@@ -250,11 +217,6 @@ class Review(models.Model):
     created_at = models.DateTimeField("Дата создания", auto_now_add=True)
     updated_at = models.DateTimeField("Дата обновления", auto_now=True)
     
-<<<<<<< HEAD
-    # Дополнительные поля
-    is_anonymous = models.BooleanField("Анонимная рецензия", default=True)
-    conflict_of_interest = models.BooleanField("Конфликт интересов", default=False)
-=======
     # Файлы рецензии
     review_file = models.FileField(
         "Файл рецензии",
@@ -292,24 +254,10 @@ class Review(models.Model):
     # История изменений
     revision_requested = models.BooleanField("Требуются исправления", default=False)
     revision_number = models.PositiveIntegerField("Номер ревизии", default=0)
->>>>>>> bebf4c4 (initial commit)
     
     class Meta:
         verbose_name = "Рецензия"
         verbose_name_plural = "Рецензии"
-<<<<<<< HEAD
-        unique_together = ('submission', 'reviewer')
-        ordering = ['-created_at']
-
-    def __str__(self):
-        return f"Рецензия {self.submission.title} - {self.reviewer.get_full_name()}"
-    
-    @property
-    def average_score(self):
-        """Вычисляет среднюю оценку."""
-        scores = [self.originality, self.scientific_value, self.methodology, self.presentation]
-        return sum(scores) / len(scores)
-=======
         unique_together = ('submission', 'reviewer', 'revision_number')
         ordering = ['-created_at']
 
@@ -335,7 +283,6 @@ class Review(models.Model):
         if scores:
             return sum(scores) / len(scores)
         return None
->>>>>>> bebf4c4 (initial commit)
     
     @property
     def is_completed(self):
@@ -370,8 +317,6 @@ class Review(models.Model):
             5: 'Отлично',
         }
         return descriptions.get(score, 'Не оценено')
-<<<<<<< HEAD
-=======
     
     def is_first_review(self):
         """Проверяет, является ли это первой рецензией для этой подачи."""
@@ -446,4 +391,3 @@ class EditorialDecision(models.Model):
             'decline': 'Отозвать',
         }
         return decision_map.get(self.decision, self.decision)
->>>>>>> bebf4c4 (initial commit)

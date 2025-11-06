@@ -2,11 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-<<<<<<< HEAD
-from django.views.generic import CreateView, UpdateView
-=======
 from django.views.generic import CreateView, UpdateView, ListView, TemplateView
->>>>>>> bebf4c4 (initial commit)
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .forms import AuthorRegistrationForm, UserProfileForm
@@ -60,8 +56,6 @@ class UserProfileUpdateView(LoginRequiredMixin, UpdateView):
         messages.error(self.request, 'Пожалуйста, исправьте ошибки в форме.')
         return super().form_invalid(form)
 
-<<<<<<< HEAD
-=======
 
 class EditorRequiredMixin(LoginRequiredMixin):
     """Доступ только для editor/admin."""
@@ -111,7 +105,6 @@ class EditorAuthorUpdateView(EditorRequiredMixin, UpdateView):
     template_name = 'users/editor_author_edit.html'
     success_url = reverse_lazy('users:editor_authors')
 
->>>>>>> bebf4c4 (initial commit)
 @login_required
 def dashboard(request):
     """Личный кабинет пользователя."""

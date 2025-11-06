@@ -4,6 +4,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.contrib.postgres.indexes import GinIndex
+from django.urls import reverse
 from .models import Article
 
 

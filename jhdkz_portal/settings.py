@@ -25,9 +25,6 @@ SECRET_KEY = 'django-insecure-w5*(rh=0nc0y&*j11*-u^&0+r_-o+v$+*ireoety^kakx)-twb
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-<<<<<<< HEAD
-ALLOWED_HOSTS = []
-=======
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "[::1]", "0.0.0.0"]
 
 # Дополнительные настройки для отладки
@@ -48,7 +45,6 @@ if DEBUG:
             },
         },
     }
->>>>>>> bebf4c4 (initial commit)
 
 
 # Application definition
@@ -60,10 +56,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-<<<<<<< HEAD
-=======
     'django.contrib.sitemaps',
->>>>>>> bebf4c4 (initial commit)
     
     # Сторонние приложения
     'rest_framework',
@@ -115,11 +108,7 @@ WSGI_APPLICATION = 'jhdkz_portal.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-<<<<<<< HEAD
-        'NAME': BASE_DIR / 'db.sqlite3',
-=======
         'NAME': str(BASE_DIR / 'db.sqlite3'),  # Явно преобразуем Path в строку
->>>>>>> bebf4c4 (initial commit)
     }
 }
 
@@ -186,12 +175,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Настройки аутентификации
 AUTH_USER_MODEL = 'users.User'
-<<<<<<< HEAD
-=======
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'users:dashboard'
 LOGOUT_REDIRECT_URL = 'core:home'
->>>>>>> bebf4c4 (initial commit)
 
 # Настройки форм
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"

@@ -1,10 +1,6 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
-<<<<<<< HEAD
-from .models import Review
-=======
 from .models import Review, ReviewAssignment, EditorialDecision
->>>>>>> bebf4c4 (initial commit)
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
@@ -12,31 +8,9 @@ class ReviewAdmin(admin.ModelAdmin):
     
     list_display = ('submission', 'reviewer', 'status', 'average_score', 'recommendation', 'assigned_at')
     list_filter = ('status', 'recommendation', 'is_anonymous', 'conflict_of_interest', 'assigned_at')
-    search_fields = ('submission__title', 'reviewer__full_name', 'reviewer__username')
+    search_fields = ('submission__title_ru', 'submission__submission_id', 'reviewer__full_name', 'reviewer__username')
     ordering = ('-assigned_at',)
     
-<<<<<<< HEAD
-    # Поля для редактирования
-    fieldsets = (
-        (_('Основная информация'), {
-            'fields': ('submission', 'reviewer', 'status', 'recommendation')
-        }),
-        (_('Оценки'), {
-            'fields': ('originality', 'scientific_value', 'methodology', 'presentation')
-        }),
-        (_('Комментарии'), {
-            'fields': ('comments_for_author', 'comments_for_editor')
-        }),
-        (_('Настройки'), {
-            'fields': ('is_anonymous', 'conflict_of_interest')
-        }),
-        (_('Даты'), {
-            'fields': ('assigned_at', 'completed_at', 'created_at', 'updated_at')
-        }),
-    )
-    
-=======
->>>>>>> bebf4c4 (initial commit)
     # Поля только для чтения
     readonly_fields = ('assigned_at', 'created_at', 'updated_at')
     
@@ -64,19 +38,12 @@ class ReviewAdmin(admin.ModelAdmin):
     
     def average_score(self, obj):
         """Средняя оценка."""
-<<<<<<< HEAD
-        return f"{obj.average_score:.1f}"
-=======
         avg = obj.average_score
         return f"{avg:.1f}" if avg else "N/A"
->>>>>>> bebf4c4 (initial commit)
     average_score.short_description = "Средняя оценка"
     
     def get_queryset(self, request):
         """Оптимизированный запрос с select_related."""
-<<<<<<< HEAD
-        return super().get_queryset(request).select_related('submission', 'reviewer')
-=======
         return super().get_queryset(request).select_related('submission', 'reviewer', 'assignment')
     
     # Обновленные поля для OJS
@@ -171,4 +138,3 @@ class EditorialDecisionAdmin(admin.ModelAdmin):
         """Отображение решения на русском."""
         return obj.get_decision_display_ru()
     get_decision_display_ru.short_description = "Решение"
->>>>>>> bebf4c4 (initial commit)

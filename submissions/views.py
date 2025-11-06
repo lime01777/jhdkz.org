@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-from django.shortcuts import render
-
-# Create your views here.
-=======
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -247,4 +242,3 @@ def submission_withdraw(request, pk):
     return render(request, 'submissions/submission_withdraw.html', {
         'submission': submission,
     })
->>>>>>> bebf4c4 (initial commit)

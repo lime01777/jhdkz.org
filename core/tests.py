@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-from django.test import TestCase
-=======
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.utils import timezone
@@ -34,6 +31,5 @@ class UrlsSmokeTests(TestCase):
         r = self.client.get('/sitemap.xml')
         self.assertEqual(r.status_code, 200)
         self.assertIn(b'<urlset', r.content)
->>>>>>> bebf4c4 (initial commit)
 
 # Create your tests here.

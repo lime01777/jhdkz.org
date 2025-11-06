@@ -1,9 +1,5 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-<<<<<<< HEAD
-=======
-from django.urls import reverse
->>>>>>> bebf4c4 (initial commit)
 
 class SiteSettings(models.Model):
     """
@@ -135,8 +131,6 @@ class News(models.Model):
         if not self.published_at and self.is_published:
             self.published_at = timezone.now()
         super().save(*args, **kwargs)
-<<<<<<< HEAD
-=======
 
 
 class Redirect(models.Model):
@@ -259,10 +253,6 @@ class EditorialTeam(models.Model):
     def is_section_editor(self):
         """Проверяет, является ли редактором раздела."""
         return self.role == 'section_editor'
-<<<<<<< HEAD
->>>>>>> bebf4c4 (initial commit)
-=======
 
 
 # Расширенные модели будут импортированы через __init__.py
->>>>>>> 84465c9 (Fix function OJS system)

@@ -1,24 +1,14 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
-<<<<<<< HEAD
-from .models import Submission
-=======
 from .models import Submission, Section, SubmissionFile, SubmissionAuthor
->>>>>>> bebf4c4 (initial commit)
 
 @admin.register(Submission)
 class SubmissionAdmin(admin.ModelAdmin):
     """Админка для модели отправки."""
     
-<<<<<<< HEAD
-    list_display = ('submission_id', 'title', 'corresponding_author', 'status', 'submitted_at', 'created_at')
-    list_filter = ('status', 'language', 'submitted_at', 'created_at')
-    search_fields = ('title', 'submission_id', 'corresponding_author__full_name', 'corresponding_author__username')
-=======
     list_display = ('submission_id', 'title_ru', 'corresponding_author', 'status', 'submitted_at', 'created_at')
     list_filter = ('status', 'language', 'submitted_at', 'created_at', 'section')
     search_fields = ('title_ru', 'title_kk', 'title_en', 'submission_id', 'corresponding_author__full_name', 'corresponding_author__username')
->>>>>>> bebf4c4 (initial commit)
     ordering = ('-created_at',)
     
     # Фильтры в правой панели
@@ -27,27 +17,14 @@ class SubmissionAdmin(admin.ModelAdmin):
     # Поля для редактирования
     fieldsets = (
         (_('Основная информация'), {
-<<<<<<< HEAD
-            'fields': ('submission_id', 'title', 'abstract', 'keywords', 'language')
-=======
             'fields': ('submission_id', 'section', 'title_ru', 'title_kk', 'title_en', 
                       'abstract_ru', 'abstract_kk', 'abstract_en',
                       'keywords_ru', 'keywords_kk', 'keywords_en', 'language')
->>>>>>> bebf4c4 (initial commit)
         }),
         (_('Авторы'), {
             'fields': ('corresponding_author', 'co_authors')
         }),
         (_('Файлы'), {
-<<<<<<< HEAD
-            'fields': ('manuscript_file', 'supplementary_files')
-        }),
-        (_('Статус и workflow'), {
-            'fields': ('status', 'submitted_at')
-        }),
-        (_('Комментарии'), {
-            'fields': ('author_comments', 'editor_comments')
-=======
             'fields': ('manuscript_file',)
         }),
         (_('Статус и workflow'), {
@@ -62,7 +39,6 @@ class SubmissionAdmin(admin.ModelAdmin):
         }),
         (_('Комментарии'), {
             'fields': ('author_comments', 'editor_comments', 'editor_reviewer_comments')
->>>>>>> bebf4c4 (initial commit)
         }),
     )
     
@@ -81,7 +57,7 @@ class SubmissionAdmin(admin.ModelAdmin):
     
     def send_to_review(self, request, queryset):
         """Отправить на рецензирование."""
-        updated = queryset.update(status='under_review')
+        updated = queryset.update(status='reviewing')
         self.message_user(request, f'{updated} рукописей отправлено на рецензирование.')
     send_to_review.short_description = "Отправить на рецензирование"
     
@@ -99,9 +75,6 @@ class SubmissionAdmin(admin.ModelAdmin):
     
     def get_queryset(self, request):
         """Оптимизированный запрос с select_related."""
-<<<<<<< HEAD
-        return super().get_queryset(request).select_related('corresponding_author')
-=======
         return super().get_queryset(request).select_related('corresponding_author', 'section', 'assigned_editor')
     
     def title_ru(self, obj):
@@ -134,4 +107,3 @@ class SubmissionAuthorAdmin(admin.ModelAdmin):
     list_display = ('submission', 'author', 'author_order', 'is_corresponding', 'is_principal')
     list_filter = ('is_corresponding', 'is_principal')
     search_fields = ('submission__submission_id', 'author__full_name', 'author__username')
->>>>>>> bebf4c4 (initial commit)

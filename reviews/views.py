@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-from django.shortcuts import render
-
-# Create your views here.
-=======
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
@@ -309,4 +304,3 @@ def make_editorial_decision(request, submission_pk):
         'form': form,
         'submission': submission,
     })
->>>>>>> bebf4c4 (initial commit)

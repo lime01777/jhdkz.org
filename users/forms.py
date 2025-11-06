@@ -44,16 +44,6 @@ class AuthorRegistrationForm(UserCreationForm):
     
     class Meta:
         model = User
-<<<<<<< HEAD
-        fields = ('username', 'email', 'full_name', 'organization', 'orcid', 'bio', 'password1', 'password2')
-        
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Устанавливаем роль автора
-        self.fields['role'].initial = 'author'
-        self.fields['role'].widget = forms.HiddenInput()
-        
-=======
         # Поля максимально близкие к форме OJS по ссылке
         fields = (
             'email',        # Адрес электронной почты
@@ -68,7 +58,6 @@ class AuthorRegistrationForm(UserCreationForm):
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
->>>>>>> bebf4c4 (initial commit)
         # Настройка полей
         self.fields['email'].required = True
         self.fields['full_name'].required = True
@@ -85,4 +74,4 @@ class AuthorRegistrationForm(UserCreationForm):
             # Простая проверка формата ORCID
             if not orcid.replace('-', '').isdigit() or len(orcid.replace('-', '')) != 16:
                 raise forms.ValidationError('ORCID должен быть в формате 0000-0000-0000-0000')
-        return orcid 
+        return orcid

@@ -1,11 +1,3 @@
-<<<<<<< HEAD
-from django.shortcuts import render, get_object_or_404
-from django.views.generic import ListView, DetailView
-from django.db.models import Q, Sum, Count
-from django.http import HttpResponse
-from django.contrib.auth import get_user_model
-from .models import Article
-=======
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, DetailView, CreateView
 from django.db import models
@@ -17,7 +9,6 @@ from django.contrib import messages
 from django.urls import reverse_lazy
 from .models import Article
 from .forms import ArticleCreateForm
->>>>>>> bebf4c4 (initial commit)
 from issues.models import Issue
 
 User = get_user_model()
@@ -80,9 +71,6 @@ class ArticleDetailView(DetailView):
         return obj
     
     def get_queryset(self):
-<<<<<<< HEAD
-        return Article.objects.filter(status='published').select_related('issue').prefetch_related('authors')
-=======
         """Показываем опубликованные статьи всем, свои статьи - авторам в любом статусе."""
         # Если пользователь авторизован и является автором, показываем ему все статьи
         if self.request.user.is_authenticated and self.request.user.role == 'author':
@@ -94,23 +82,15 @@ class ArticleDetailView(DetailView):
         else:
             # Обычным пользователям показываем только опубликованные статьи
             return Article.objects.filter(status='published').select_related('issue').prefetch_related('authors')
->>>>>>> bebf4c4 (initial commit)
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-<<<<<<< HEAD
-        # Увеличиваем счетчик просмотров
-        self.object.increment_views()
-        
-        # Похожие статьи
-=======
         # Увеличиваем счетчик просмотров только для опубликованных статей
         if self.object.status == 'published':
             self.object.increment_views()
         
         # Похожие статьи (только опубликованные)
->>>>>>> bebf4c4 (initial commit)
         similar_articles = Article.objects.filter(
             status='published'
         ).exclude(
@@ -121,14 +101,11 @@ class ArticleDetailView(DetailView):
         ).distinct()[:3]
         
         context['similar_articles'] = similar_articles
-<<<<<<< HEAD
-=======
         context['can_view_draft'] = (
             self.request.user.is_authenticated and 
             self.request.user.role == 'author' and 
             self.request.user in self.object.authors.all()
         )
->>>>>>> bebf4c4 (initial commit)
         return context
 
 def article_search(request):
@@ -228,8 +205,7 @@ def author_articles(request, author_id):
         'articles': articles,
     }
     return render(request, 'articles/author_articles.html', context)
-<<<<<<< HEAD
-=======
+
 
 class ArticleCreateView(LoginRequiredMixin, CreateView):
     """Создание новой статьи автором."""
@@ -279,4 +255,3 @@ class ArticleCreateView(LoginRequiredMixin, CreateView):
         """Обработка ошибок валидации."""
         messages.error(self.request, 'Пожалуйста, исправьте ошибки в форме.')
         return super().form_invalid(form)
->>>>>>> bebf4c4 (initial commit)

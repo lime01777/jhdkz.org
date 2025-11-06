@@ -1,25 +1,19 @@
-<<<<<<< HEAD
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.views.generic import ListView, DetailView
-from django.db.models import Sum, Count, Q
-=======
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.views.generic import ListView, DetailView, TemplateView
 from django.db.models import Sum, Count, Q
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, FileResponse, Http404
 from django.conf import settings
->>>>>>> bebf4c4 (initial commit)
 from .models import SiteSettings, News, Page
 from issues.models import Issue
 from articles.models import Article
 from users.models import User
-<<<<<<< HEAD
-=======
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from django.db import connection
->>>>>>> bebf4c4 (initial commit)
+from articles.models_extended import ArticleFile
+from core.models_extended import Event
+import os
+
 
 def home(request):
     """Главная страница."""
@@ -66,11 +60,7 @@ def contact(request):
 class NewsListView(ListView):
     """Список новостей."""
     model = News
-<<<<<<< HEAD
-    template_name = 'core/news/news_list.html'
-=======
     template_name = 'core/news_list.html'
->>>>>>> bebf4c4 (initial commit)
     context_object_name = 'news_list'
     paginate_by = 10
     
@@ -92,11 +82,7 @@ class NewsListView(ListView):
 class NewsDetailView(DetailView):
     """Детальная страница новости."""
     model = News
-<<<<<<< HEAD
-    template_name = 'core/news/news_detail.html'
-=======
     template_name = 'core/news_detail.html'
->>>>>>> bebf4c4 (initial commit)
     context_object_name = 'news'
     
     def get_queryset(self):
@@ -134,8 +120,6 @@ class PageDetailView(DetailView):
     
     def get_queryset(self):
         return Page.objects.filter(is_published=True)
-<<<<<<< HEAD
-=======
 
 
 def author_detail(request, slug):
@@ -152,15 +136,10 @@ def file_download(request, pk):
     Скачивание файла по pk.
     Поддерживает файлы из ArticleFile и других источников.
     """
-    from django.http import FileResponse, Http404
-    from articles.models_extended import ArticleFile
-    import os
-    
     try:
         file_obj = ArticleFile.objects.get(pk=pk)
         
         # Логируем событие загрузки
-        from core.models_extended import Event
         Event.objects.create(
             object_type='file',
             object_id=file_obj.pk,
@@ -283,4 +262,3 @@ def api_search(request):
             })
 
     return JsonResponse({"results": items})
->>>>>>> bebf4c4 (initial commit)
