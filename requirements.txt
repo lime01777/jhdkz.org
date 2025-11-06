@@ -7,8 +7,12 @@ dj-database-url
 djangorestframework
 django-allauth
 django-modeltranslation
+django-environ>=0.11.0
 Pillow
 django-crispy-forms
 crispy-bootstrap5
 gunicorn
-python-dotenv 
+python-dotenv
+beautifulsoup4>=4.12.0
+requests>=2.31.0
+lxml>=5.0.0 

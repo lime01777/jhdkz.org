@@ -1,7 +1,14 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
+from django.utils.text import slugify
+from django.urls import reverse
 from issues.models import Issue
+
+try:
+    from submissions.models import Section
+except ImportError:
+    Section = None
 
 User = get_user_model()
 
@@ -17,11 +24,22 @@ class Article(models.Model):
         related_name='articles', 
         verbose_name="Выпуск"
     )
+    section = models.ForeignKey(
+        'submissions.Section',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='articles',
+        verbose_name="Раздел"
+    )
     authors = models.ManyToManyField(
         User, 
         related_name='articles', 
         verbose_name="Авторы"
     )
+    
+    # URL slug для статьи (может быть пустым при создании, автогенерируется в save())
+    slug = models.SlugField("URL", max_length=500, unique=True, db_index=True, blank=True, null=True)
     
     # Многоязычные поля
     title_ru = models.CharField("Название (русский)", max_length=500)
@@ -76,6 +94,12 @@ class Article(models.Model):
         verbose_name = "Статья"
         verbose_name_plural = "Статьи"
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['slug']),
+            models.Index(fields=['status', 'published_at']),
+            models.Index(fields=['issue', 'status']),
+            models.Index(fields=['doi']),
+        ]
 
     def __str__(self):
         return self.title_ru
@@ -130,3 +154,25 @@ class Article(models.Model):
     def get_pages_info(self):
         """Возвращает информацию о страницах."""
         return f"{self.page_start}-{self.page_end}"
+    
+    def save(self, *args, **kwargs):
+        """Автоматически генерирует slug если не указан."""
+        if not self.slug and self.title_ru:
+            self.slug = slugify(self.title_ru)[:500]
+            # Проверяем уникальность
+            original_slug = self.slug
+            counter = 1
+            while Article.objects.filter(slug=self.slug).exclude(pk=self.pk).exists():
+                self.slug = f"{original_slug}-{counter}"
+                counter += 1
+        super().save(*args, **kwargs)
+    
+    def get_absolute_url(self):
+        """Возвращает URL для детальной страницы статьи."""
+        if self.slug:
+            return reverse('articles:article_detail', kwargs={'slug': self.slug})
+        # Fallback на pk если slug еще не создан
+        return reverse('articles:article_detail_by_id', kwargs={'pk': self.pk})
+
+
+# Расширенные модели будут импортированы через __init__.py

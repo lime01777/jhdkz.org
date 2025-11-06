@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from django.utils.html import format_html
 from .models import Article
+from .models_extended import ArticleLocale, Keyword, ArticleFile
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
@@ -82,3 +83,42 @@ class ArticleAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         """Оптимизированный запрос с prefetch_related."""
         return super().get_queryset(request).prefetch_related('authors', 'issue')
+
+
+@admin.register(ArticleLocale)
+class ArticleLocaleAdmin(admin.ModelAdmin):
+    """Админка для локализаций статей."""
+    list_display = ('article', 'language', 'title', 'updated_at')
+    list_filter = ('language',)
+    search_fields = ('article__title_ru', 'title', 'abstract', 'body_html')
+    ordering = ('article', 'language')
+    readonly_fields = ('created_at', 'updated_at')
+
+
+@admin.register(Keyword)
+class KeywordAdmin(admin.ModelAdmin):
+    """Админка для ключевых слов."""
+    list_display = ('term', 'language', 'articles_count', 'created_at')
+    list_filter = ('language',)
+    search_fields = ('term',)
+    ordering = ('term', 'language')
+    filter_horizontal = ('articles',)
+    
+    def articles_count(self, obj):
+        """Количество статей с этим ключевым словом."""
+        return obj.articles.count()
+    articles_count.short_description = "Количество статей"
+
+
+@admin.register(ArticleFile)
+class ArticleFileAdmin(admin.ModelAdmin):
+    """Админка для файлов статей."""
+    list_display = ('article', 'kind', 'original_name', 'size', 'created_at')
+    list_filter = ('kind', 'created_at')
+    search_fields = ('article__title_ru', 'original_name', 'description')
+    ordering = ('-created_at',)
+    readonly_fields = ('size', 'created_at', 'updated_at')
+    
+    def get_queryset(self, request):
+        """Оптимизированный запрос."""
+        return super().get_queryset(request).select_related('article')

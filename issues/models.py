@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.utils.text import slugify
 
 class Issue(models.Model):
     """
@@ -9,6 +10,7 @@ class Issue(models.Model):
     # Основная информация
     year = models.PositiveIntegerField("Год", help_text="Год выпуска журнала")
     number = models.PositiveIntegerField("Номер", help_text="Номер выпуска в году")
+    slug = models.SlugField("URL", max_length=100, unique=True, blank=True, null=True, help_text="Автоматически генерируется из года и номера")
     
     # Многоязычные поля
     title_ru = models.CharField("Название (русский)", max_length=255)
@@ -41,6 +43,11 @@ class Issue(models.Model):
         verbose_name_plural = "Выпуски"
         unique_together = ('year', 'number')
         ordering = ['-year', '-number']
+        indexes = [
+            models.Index(fields=['year', 'number']),
+            models.Index(fields=['slug']),
+            models.Index(fields=['status', 'published_at']),
+        ]
 
     def __str__(self):
         return f"Выпуск {self.year} №{self.number}"
@@ -67,3 +74,14 @@ class Issue(models.Model):
     def get_volume_info(self):
         """Возвращает информацию о томе и номере."""
         return f"Volume {self.year}, Number {self.number}"
+    
+    def save(self, *args, **kwargs):
+        """Автоматически генерирует slug если не указан."""
+        if not self.slug:
+            self.slug = slugify(f"{self.year}-{self.number}")
+        super().save(*args, **kwargs)
+    
+    def get_absolute_url(self):
+        """Возвращает URL для детальной страницы выпуска."""
+        from django.urls import reverse
+        return reverse('issues:issue_detail', kwargs={'year': self.year, 'number': self.number})
