@@ -35,15 +35,11 @@ class IssueDetailView(DetailView):
     template_name = 'issues/issue_detail.html'
     context_object_name = 'issue'
     
-    def get_queryset(self):
-        return Issue.objects.filter(status='published').prefetch_related('articles__authors')
-    
     def get_object(self, queryset=None):
         """Ищем выпуск по паре year/number из URL вместо pk."""
-        queryset = queryset or self.get_queryset()
         year = self.kwargs.get('year')
         number = self.kwargs.get('number')
-        return get_object_or_404(queryset, year=year, number=number)
+        return Issue.objects.get(year=year, number=number)
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
