@@ -39,7 +39,8 @@ class IssueDetailView(DetailView):
         """Ищем выпуск по паре year/number из URL вместо pk."""
         year = self.kwargs.get('year')
         number = self.kwargs.get('number')
-        return Issue.objects.get(year=year, number=number)
+        # Используем get_object_or_404 для корректной обработки 404 ошибок
+        return get_object_or_404(Issue, year=year, number=number)
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

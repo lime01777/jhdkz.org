@@ -1,11 +1,13 @@
 PY=python
 VENV=venv
 
-.PHONY: help dev etl import test migrate deploy collectstatic
+.PHONY: help dev db shell etl import test migrate deploy collectstatic
 
 help:
 	@echo "Доступные команды:"
 	@echo "  make dev        - Запуск сервера разработки"
+	@echo "  make db         - Просмотр базы данных (статистика)"
+	@echo "  make shell      - Django shell"
 	@echo "  make etl        - Запуск ETL краулинга"
 	@echo "  make import     - Импорт данных из JSONL"
 	@echo "  make test       - Запуск тестов"
@@ -14,6 +16,12 @@ help:
 
 dev:
 	$(PY) manage.py runserver
+
+db:
+	$(PY) view_db.py
+
+shell:
+	$(PY) manage.py shell
 
 etl:
 	$(PY) -m etl crawl --start https://jhdkz.org/ --out data/raw.jsonl --langs ru,kk,en

@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'reviews',
 ]
 
+# Базовый список middleware
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -59,6 +60,16 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'core.middleware.RedirectMiddleware',  # Обработка редиректов старых URL
 ]
+
+# WhiteNoise для статических файлов (опционально, только если установлен)
+# В продакшене обязателен, в разработке опционален
+try:
+    import whitenoise
+    # Вставляем WhiteNoise после SecurityMiddleware
+    MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+except ImportError:
+    # WhiteNoise не установлен - это нормально для разработки
+    pass
 
 ROOT_URLCONF = 'jhdkz_portal.urls'
 

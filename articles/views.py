@@ -44,7 +44,12 @@ class ArticleListView(ListView):
         return context
 
 class ArticleDetailView(DetailView):
-    """Детальная страница статьи. Поддерживает поиск по slug или pk."""
+    """
+    Детальная страница статьи.
+    Поддерживает поиск по slug или pk.
+    Показывает только опубликованные статьи для обычных пользователей.
+    Авторы могут видеть свои неопубликованные статьи.
+    """
     model = Article
     template_name = 'articles/article_detail.html'
     context_object_name = 'article'
@@ -52,36 +57,51 @@ class ArticleDetailView(DetailView):
     slug_field = 'slug'
     pk_url_kwarg = 'pk'
     
+    def get_queryset(self):
+        """
+        Возвращает queryset статей в зависимости от роли пользователя.
+        - Обычные пользователи (неавторизованные или не-авторы): только опубликованные статьи
+        - Авторы: опубликованные статьи + свои статьи в любом статусе
+        """
+        # Базовый queryset с оптимизацией
+        base_queryset = Article.objects.select_related('issue', 'section').prefetch_related('authors')
+        
+        # Если пользователь авторизован и является автором
+        if self.request.user.is_authenticated and hasattr(self.request.user, 'role') and self.request.user.role == 'author':
+            # Показываем опубликованные статьи ИЛИ статьи автора в любом статусе
+            return base_queryset.filter(
+                models.Q(status='published') | 
+                models.Q(authors=self.request.user)
+            ).distinct()
+        else:
+            # Для всех остальных показываем ТОЛЬКО опубликованные статьи
+            return base_queryset.filter(status='published')
+    
     def get_object(self, queryset=None):
-        """Получает объект по slug или pk."""
+        """
+        Получает объект статьи по slug или pk из URL.
+        Использует get_queryset() для фильтрации только опубликованных статей.
+        """
+        # Получаем queryset (уже отфильтрованный через get_queryset())
         if queryset is None:
             queryset = self.get_queryset()
         
-        slug = self.kwargs.get('slug')
-        pk = self.kwargs.get('pk')
+        # Получаем параметры из URL
+        slug = self.kwargs.get(self.slug_url_kwarg)
+        pk = self.kwargs.get(self.pk_url_kwarg)
         
+        # Ищем по slug (приоритет) или по pk (fallback)
         if slug:
-            queryset = queryset.filter(slug=slug)
+            obj = get_object_or_404(queryset, slug=slug)
         elif pk:
-            queryset = queryset.filter(pk=pk)
+            obj = get_object_or_404(queryset, pk=pk)
         else:
-            raise AttributeError("ArticleDetailView должен получать slug или pk")
+            # Это не должно произойти при правильной настройке URL
+            raise AttributeError(
+                f"ArticleDetailView должен получать '{self.slug_url_kwarg}' или '{self.pk_url_kwarg}' в kwargs"
+            )
         
-        obj = get_object_or_404(queryset)
         return obj
-    
-    def get_queryset(self):
-        """Показываем опубликованные статьи всем, свои статьи - авторам в любом статусе."""
-        # Если пользователь авторизован и является автором, показываем ему все статьи
-        if self.request.user.is_authenticated and self.request.user.role == 'author':
-            # Показываем опубликованные статьи ИЛИ статьи автора в любом статусе
-            return Article.objects.filter(
-                models.Q(status='published') | 
-                models.Q(authors=self.request.user)
-            ).select_related('issue').prefetch_related('authors').distinct()
-        else:
-            # Обычным пользователям показываем только опубликованные статьи
-            return Article.objects.filter(status='published').select_related('issue').prefetch_related('authors')
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

@@ -13,13 +13,16 @@ urlpatterns = [
     # Создание статьи (только для авторов)
     path('create/', views.ArticleCreateView.as_view(), name='article_create'),
     
-    # Детальная страница статьи (по slug или id)
-    path('<slug:slug>/', views.ArticleDetailView.as_view(), name='article_detail'),
-    path('<int:pk>/', views.ArticleDetailView.as_view(), name='article_detail_by_id'),  # Для обратной совместимости
+    # Статьи автора (должно быть перед детальными страницами)
+    path('author/<int:author_id>/', views.author_articles, name='author_articles'),
     
-    # Загрузка PDF статьи
+    # Загрузка PDF статьи (должно быть перед детальными страницами)
     path('<int:pk>/download/', views.article_download, name='article_download'),
     
-    # Статьи автора
-    path('author/<int:author_id>/', views.author_articles, name='author_articles'),
+    # Детальная страница статьи (по slug - приоритет, SEO-friendly)
+    path('<slug:slug>/', views.ArticleDetailView.as_view(), name='article_detail'),
+    
+    # Детальная страница статьи по pk (fallback для обратной совместимости)
+    # ВАЖНО: должен быть после slug, так как иначе будет перехватывать все числовые пути
+    path('<int:pk>/', views.ArticleDetailView.as_view(), name='article_detail_by_id'),
 ]

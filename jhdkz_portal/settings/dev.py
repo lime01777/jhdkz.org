@@ -7,6 +7,16 @@ from .base import *  # noqa
 DEBUG = True
 ALLOWED_HOSTS = ['*']
 
+# В разработке WhiteNoise не обязателен, статические файлы обслуживает runserver
+# Если нужно, можно отключить WhiteNoise для разработки
+try:
+    if 'whitenoise.middleware.WhiteNoiseMiddleware' in MIDDLEWARE:
+        # В разработке можно убрать WhiteNoise, так как runserver сам обслуживает статику
+        # MIDDLEWARE.remove('whitenoise.middleware.WhiteNoiseMiddleware')
+        pass
+except (ValueError, AttributeError):
+    pass
+
 # База данных для разработки - SQLite
 DATABASES = {
     'default': {

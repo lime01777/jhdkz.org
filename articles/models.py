@@ -168,10 +168,14 @@ class Article(models.Model):
         super().save(*args, **kwargs)
     
     def get_absolute_url(self):
-        """Возвращает URL для детальной страницы статьи."""
+        """
+        Возвращает URL для детальной страницы статьи.
+        Использует slug если доступен, иначе использует pk.
+        """
+        # Приоритет: slug (SEO-friendly URL)
         if self.slug:
             return reverse('articles:article_detail', kwargs={'slug': self.slug})
-        # Fallback на pk если slug еще не создан
+        # Fallback на pk если slug еще не создан (для старых записей)
         return reverse('articles:article_detail_by_id', kwargs={'pk': self.pk})
 
 

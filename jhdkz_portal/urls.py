@@ -21,6 +21,13 @@ urlpatterns = [
     path('', include('core.urls')),
 ]
 
+# В продакшене статические файлы должны обслуживаться через веб-сервер (nginx) или WhiteNoise
+# Медиа файлы должны обслуживаться через веб-сервер
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+else:
+    # В продакшене для медиа файлов нужен веб-сервер (nginx)
+    # Для отладки можно временно раскомментировать:
+    # urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    pass
