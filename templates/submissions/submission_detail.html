@@ -159,7 +159,7 @@
                                     Отправить
                                 </a>
                             {% endif %}
-                            {% if submission.status not in ['published', 'declined'] %}
+                            {% if submission.status != 'published' and submission.status != 'declined' %}
                                 <a href="{% url 'submissions:withdraw' submission.pk %}" class="btn btn-warning btn-sm w-100">
                                     Отозвать подачу
                                 </a>

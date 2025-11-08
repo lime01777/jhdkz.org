@@ -10,8 +10,8 @@ urlpatterns = [
     # Поиск статей
     path('search/', views.article_search, name='article_search'),
     
-    # Создание статьи (только для авторов)
-    path('create/', views.ArticleCreateView.as_view(), name='article_create'),
+    # Создание статьи перенаправляет на workflow подачи
+    path('create/', views.article_create_redirect, name='article_create'),
     
     # Статьи автора (должно быть перед детальными страницами)
     path('author/<int:author_id>/', views.author_articles, name='author_articles'),

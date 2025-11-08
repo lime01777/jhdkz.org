@@ -1,14 +1,13 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic import ListView, DetailView
 from django.db import models
 from django.db.models import Q, Sum, Count
 from django.http import HttpResponse
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.urls import reverse_lazy
 from .models import Article
-from .forms import ArticleCreateForm
 from issues.models import Issue
 
 User = get_user_model()
@@ -66,16 +65,25 @@ class ArticleDetailView(DetailView):
         # Базовый queryset с оптимизацией
         base_queryset = Article.objects.select_related('issue', 'section').prefetch_related('authors')
         
-        # Если пользователь авторизован и является автором
-        if self.request.user.is_authenticated and hasattr(self.request.user, 'role') and self.request.user.role == 'author':
-            # Показываем опубликованные статьи ИЛИ статьи автора в любом статусе
-            return base_queryset.filter(
-                models.Q(status='published') | 
-                models.Q(authors=self.request.user)
-            ).distinct()
-        else:
-            # Для всех остальных показываем ТОЛЬКО опубликованные статьи
+        user = self.request.user
+
+        if not user.is_authenticated:
             return base_queryset.filter(status='published')
+
+        # Администраторы/редакторы видят все статьи
+        if hasattr(user, 'is_editor') and user.is_editor():
+            return base_queryset
+        if user.is_staff:
+            return base_queryset
+
+        # Авторы видят опубликованные + свои статьи
+        if hasattr(user, 'role') and user.role == 'author':
+            return base_queryset.filter(
+                models.Q(status='published') | models.Q(authors=user)
+            ).distinct()
+
+        # Остальные — только опубликованные
+        return base_queryset.filter(status='published')
     
     def get_object(self, queryset=None):
         """
@@ -92,7 +100,13 @@ class ArticleDetailView(DetailView):
         
         # Ищем по slug (приоритет) или по pk (fallback)
         if slug:
-            obj = get_object_or_404(queryset, slug=slug)
+            try:
+                obj = queryset.get(slug=slug)
+            except Article.DoesNotExist:
+                if slug.isdigit():
+                    obj = get_object_or_404(queryset, pk=int(slug))
+                else:
+                    raise
         elif pk:
             obj = get_object_or_404(queryset, pk=pk)
         else:
@@ -227,51 +241,16 @@ def author_articles(request, author_id):
     return render(request, 'articles/author_articles.html', context)
 
 
-class ArticleCreateView(LoginRequiredMixin, CreateView):
-    """Создание новой статьи автором."""
-    model = Article
-    form_class = ArticleCreateForm
-    template_name = 'articles/article_create.html'
-    success_url = reverse_lazy('users:my_articles')
-    
-    def dispatch(self, request, *args, **kwargs):
-        """Проверяем, что пользователь является автором."""
-        if not request.user.is_authenticated:
-            messages.error(request, 'Необходимо войти в систему.')
-            return redirect('login')
-        
-        if request.user.role != 'author':
-            messages.error(request, 'Создавать статьи могут только авторы.')
-            return redirect('users:dashboard')
-        
-        return super().dispatch(request, *args, **kwargs)
-    
-    def form_valid(self, form):
-        """Обработка успешного создания статьи."""
-        # Получаем последний опубликованный выпуск
-        try:
-            latest_issue = Issue.objects.filter(status='published').order_by('-year', '-number').first()
-            if not latest_issue:
-                messages.error(self.request, 'Нет доступных выпусков для публикации статьи.')
-                return self.form_invalid(form)
-            
-            # Сохраняем статью
-            article = form.save(commit=False)
-            article.issue = latest_issue
-            article.status = 'draft'  # Статья создается как черновик
-            article.save()
-            
-            # Добавляем автора
-            article.authors.add(self.request.user)
-            
-            messages.success(self.request, 'Статья успешно создана! Она сохранена как черновик.')
-            return super().form_valid(form)
-            
-        except Exception as e:
-            messages.error(self.request, f'Ошибка при создании статьи: {str(e)}')
-            return self.form_invalid(form)
-    
-    def form_invalid(self, form):
-        """Обработка ошибок валидации."""
-        messages.error(self.request, 'Пожалуйста, исправьте ошибки в форме.')
-        return super().form_invalid(form)
+@login_required
+def article_create_redirect(request):
+    """Направляем авторов в единый workflow подачи (submissions:create)."""
+    if hasattr(request.user, 'role') and request.user.role != 'author' and not request.user.is_staff:
+        messages.error(request, 'Создавать подачи могут только авторы.')
+        return redirect('users:dashboard')
+
+    messages.info(
+        request,
+        'Создание статей выполняется через мастер подачи. '
+        'Пожалуйста, заполните заявку на публикацию.'
+    )
+    return redirect('submissions:create')

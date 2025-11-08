@@ -19,7 +19,7 @@ class ArticleAdmin(admin.ModelAdmin):
     # Поля для редактирования
     fieldsets = (
         (_('Основная информация'), {
-            'fields': ('issue', 'status', 'language', 'doi')
+            'fields': ('issue', 'submission', 'status', 'language', 'doi')
         }),
         (_('Названия'), {
             'fields': ('title_ru', 'title_kk', 'title_en')
@@ -42,7 +42,7 @@ class ArticleAdmin(admin.ModelAdmin):
     )
     
     # Поля только для чтения
-    readonly_fields = ('views', 'downloads', 'created_at', 'updated_at')
+    readonly_fields = ('submission', 'views', 'downloads', 'created_at', 'updated_at')
     
     # Действия
     actions = ['publish_articles', 'accept_articles', 'reject_articles', 'reset_views']

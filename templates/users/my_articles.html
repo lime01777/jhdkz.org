@@ -90,7 +90,7 @@
                 <div class="card h-100 article-card">
                     <div class="card-body">
                         <h5 class="card-title">
-                            <a href="{% url 'articles:article_detail' article.pk %}" class="text-decoration-none">
+                            <a href="{{ article.get_absolute_url }}" class="text-decoration-none">
                                 {{ article.get_title|truncatewords:10 }}
                             </a>
                         </h5>
@@ -107,7 +107,7 @@
                                 <i class="fas fa-download ms-2"></i> {{ article.downloads }}
                             </small>
                             <div class="btn-group">
-                                <a href="{% url 'articles:article_detail' article.pk %}" class="btn btn-sm btn-primary">
+                                <a href="{{ article.get_absolute_url }}" class="btn btn-sm btn-primary">
                                     <i class="fas fa-eye"></i> Просмотр
                                 </a>
                                 {% if article.pdf_file %}
@@ -140,7 +140,7 @@
                 <p class="text-muted mb-4">
                     После публикации ваши статьи появятся в этом разделе.
                 </p>
-                <a href="{% url 'articles:article_create' %}" class="btn btn-primary">
+                <a href="{% url 'submissions:create' %}" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Добавить статью
                 </a>
             </div>
@@ -199,7 +199,7 @@
             </div>
             <div class="card-body">
                 <div class="d-grid gap-2">
-                    <a href="{% url 'articles:article_create' %}" class="btn btn-outline-success">
+                    <a href="{% url 'submissions:create' %}" class="btn btn-outline-success">
                         <i class="fas fa-plus"></i> Добавить новую статью
                     </a>
                     <a href="{% url 'articles:article_search' %}" class="btn btn-outline-info">

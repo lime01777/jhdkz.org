@@ -114,7 +114,7 @@
                 {% for similar in similar_articles %}
                 <div class="similar-article mb-3 pb-3 border-bottom">
                     <h5>
-                        <a href="{% url 'articles:article_detail' similar.pk %}" class="text-decoration-none">
+                        <a href="{{ similar.get_absolute_url }}" class="text-decoration-none">
                             {{ similar.get_title }}
                         </a>
                     </h5>

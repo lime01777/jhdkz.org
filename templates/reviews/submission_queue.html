@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load status_tags %}
 
 {% block title %}Очередь подач{% endblock %}
 
@@ -68,7 +69,7 @@
                                             {% endif %}
                                         </td>
                                         <td>
-                                            <span class="badge bg-{{ submission.status|default:'secondary' }}">
+                                            <span class="badge bg-{{ submission.status|submission_status_badge }}">
                                                 {{ submission.get_status_display_ru }}
                                             </span>
                                         </td>

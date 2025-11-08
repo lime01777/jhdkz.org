@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load status_tags %}
 
 {% block title %}Панель рецензента{% endblock %}
 
@@ -70,7 +71,7 @@
                                         <td><strong>{{ assignment.submission.submission_id }}</strong></td>
                                         <td>{{ assignment.submission.title_ru|truncatewords:8 }}</td>
                                         <td>
-                                            <span class="badge bg-{{ assignment.status|default:'secondary' }}">
+                                            <span class="badge bg-{{ assignment.status|assignment_status_badge }}">
                                                 {{ assignment.get_status_display }}
                                             </span>
                                         </td>

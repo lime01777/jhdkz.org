@@ -292,7 +292,8 @@ class Submission(models.Model):
             self.title_ru and
             self.abstract_ru and
             self.manuscript_file and
-            self.section
+            self.section and
+            self.submission_authors.exists()
         )
 
 

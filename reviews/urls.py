@@ -7,6 +7,8 @@ urlpatterns = [
     # Редакторская панель
     path('editor/dashboard/', views.editor_dashboard, name='editor_dashboard'),
     path('editor/queue/', views.submission_queue, name='submission_queue'),
+    path('editor/assignments/', views.reviewer_management, name='reviewer_management'),
+    path('editor/issues/create/', views.issue_create, name='issue_create'),
     path('editor/submission/<int:pk>/', views.submission_editor_detail, name='submission_editor_detail'),
     path('editor/submission/<int:submission_pk>/assign-reviewer/', views.assign_reviewer, name='assign_reviewer'),
     path('editor/submission/<int:submission_pk>/decision/', views.make_editorial_decision, name='make_decision'),

@@ -2,8 +2,12 @@ from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Row, Column, Submit, Fieldset
 
+from django.utils import timezone
+
 from .models import ReviewAssignment, Review, EditorialDecision
 from users.models import User
+from issues.models import Issue
+from articles.models import Article
 
 
 class ReviewAssignmentForm(forms.ModelForm):
@@ -170,5 +174,83 @@ class EditorialDecisionForm(forms.ModelForm):
             'internal_notes',
             'reviews',
             Submit('submit', 'Принять решение', css_class='btn btn-primary btn-lg'),
+        )
+
+
+class IssueCreateForm(forms.ModelForm):
+    """Форма создания выпуска и выбора статей."""
+
+    articles = forms.ModelMultipleChoiceField(
+        queryset=Article.objects.none(),
+        required=False,
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
+        label="Статьи для выпуска",
+        help_text="Выберите статьи, которые войдут в выпуск. Статус будет автоматически переведён в «Опубликована».",
+    )
+
+    class Meta:
+        model = Issue
+        fields = [
+            'year',
+            'number',
+            'title_ru',
+            'title_kk',
+            'title_en',
+            'description',
+            'published_at',
+            'status',
+            'cover_image',
+            'pdf_file',
+        ]
+        widgets = {
+            'year': forms.NumberInput(attrs={'class': 'form-control', 'min': 1900}),
+            'number': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
+            'title_ru': forms.TextInput(attrs={'class': 'form-control'}),
+            'title_kk': forms.TextInput(attrs={'class': 'form-control'}),
+            'title_en': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+            'published_at': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'status': forms.Select(attrs={'class': 'form-select'}),
+            'cover_image': forms.FileInput(attrs={'class': 'form-control'}),
+            'pdf_file': forms.FileInput(attrs={'class': 'form-control', 'accept': '.pdf'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['status'].choices = Issue.STATUS_CHOICES
+        self.fields['articles'].queryset = Article.objects.filter(
+            status__in=['accepted', 'published'],
+            issue__isnull=True,
+        ).order_by('-created_at')
+
+        if not self.initial.get('published_at'):
+            self.initial['published_at'] = timezone.now().date()
+
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        self.helper.layout = Layout(
+            Fieldset(
+                'Информация о выпуске',
+                Row(
+                    Column('year', css_class='col-md-4'),
+                    Column('number', css_class='col-md-4'),
+                    Column('status', css_class='col-md-4'),
+                ),
+                Row(
+                    Column('title_ru', css_class='col-md-12'),
+                    Column('title_kk', css_class='col-md-6'),
+                    Column('title_en', css_class='col-md-6'),
+                ),
+                'description',
+                Row(
+                    Column('published_at', css_class='col-md-6'),
+                    Column('cover_image', css_class='col-md-6'),
+                ),
+                'pdf_file',
+            ),
+            Fieldset(
+                'Статьи',
+                'articles',
+            ),
         )
 

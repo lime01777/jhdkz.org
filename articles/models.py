@@ -19,10 +19,18 @@ class Article(models.Model):
     """
     # Связи
     issue = models.ForeignKey(
-        Issue, 
-        on_delete=models.CASCADE, 
-        related_name='articles', 
+        Issue,
+        on_delete=models.CASCADE,
+        related_name='articles',
         verbose_name="Выпуск"
+    )
+    submission = models.ForeignKey(
+        'submissions.Submission',
+        on_delete=models.SET_NULL,
+        related_name='articles',
+        verbose_name="Подача",
+        null=True,
+        blank=True,
     )
     section = models.ForeignKey(
         'submissions.Section',

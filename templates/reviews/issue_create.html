@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Создание выпуска{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">
+            <i class="bi bi-journal-bookmark"></i> Новый выпуск
+        </h1>
+        <div class="btn-group">
+            <a href="{% url 'reviews:editor_dashboard' %}" class="btn btn-outline-secondary">
+                ← Панель редактора
+            </a>
+            <a href="{% url 'issues:issue_list' %}" class="btn btn-outline-primary">
+                Все выпуски
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-7">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">Информация о выпуске</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            {{ form|crispy }}
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle"></i> Создать выпуск
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-file-earmark-text"></i> Доступные статьи</h5>
+                </div>
+                <div class="card-body">
+                    {% if available_articles %}
+                        <p class="text-muted mb-3">
+                            Можно добавить статьи со статусом «Принята» или неприкреплённые опубликованные статьи.
+                        </p>
+                        <div class="list-group list-group-flush">
+                            {% for article in available_articles %}
+                                <div class="list-group-item">
+                                    <div class="fw-semibold">{{ article.get_title }}</div>
+                                    <div class="small text-muted">
+                                        Статус: {{ article.get_status_display }}
+                                        {% if article.submission %}
+                                            • Подача: {{ article.submission.submission_id }}
+                                        {% endif %}
+                                    </div>
+                                    <div class="small text-muted">
+                                        Авторы:
+                                        {% for author in article.authors.all %}
+                                            {{ author.get_full_name }}{% if not forloop.last %}, {% endif %}
+                                        {% empty %}
+                                            не указаны
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">
+                            Нет статей без выпуска. После принятия статей создайте выпуск и вернитесь сюда.
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

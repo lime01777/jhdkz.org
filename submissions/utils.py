@@ -4,8 +4,11 @@ Email уведомления и вспомогательные функции.
 """
 from django.core.mail import send_mail
 from django.conf import settings
-from django.template.loader import render_to_string
+from django.utils import timezone
+from django.db import transaction
 
+from articles.models import Article
+from issues.models import Issue
 
 def send_submission_confirmation_email(submission):
     """Отправка email подтверждения получения подачи."""
@@ -139,4 +142,63 @@ def send_editorial_decision_email(decision):
         )
     except Exception:
         pass
+
+
+@transaction.atomic
+def publish_submission_to_article(submission):
+    """
+    Создает или обновляет Article из принятой подачи.
+    Возвращает Article или None, если публикация невозможна.
+    """
+    if submission is None:
+        return None
+
+    # Ищем подходящий выпуск (последний по году/номеру)
+    issue = Issue.objects.order_by('-year', '-number').first()
+    if issue is None:
+        return None
+
+    article = Article.objects.filter(submission=submission).first()
+    created = False
+    if article is None:
+        article = Article(submission=submission)
+        created = True
+
+    article.issue = issue
+    article.section = submission.section
+    article.language = submission.language or 'ru'
+
+    article.title_ru = submission.title_ru or submission.title_en or submission.title_kk or 'Без названия'
+    article.title_kk = submission.title_kk
+    article.title_en = submission.title_en
+    article.abstract_ru = submission.abstract_ru
+    article.abstract_kk = submission.abstract_kk
+    article.abstract_en = submission.abstract_en
+    article.keywords_ru = submission.keywords_ru or ''
+    article.keywords_kk = submission.keywords_kk or ''
+    article.keywords_en = submission.keywords_en or ''
+
+    # Технические поля: минимальные значения, если не заполнены
+    article.page_start = article.page_start or 1
+    article.page_end = article.page_end or (article.page_start + 1)
+    if article.page_end <= article.page_start:
+        article.page_end = article.page_start + 1
+
+    if submission.manuscript_file and (created or not article.pdf_file):
+        article.pdf_file = submission.manuscript_file
+
+    article.status = 'published'
+    article.submitted_at = submission.submitted_at or timezone.now()
+    article.published_at = timezone.now()
+    article.save()
+
+    # Привязка авторов (корреспондирующий + соавторы)
+    authors = []
+    if submission.corresponding_author:
+        authors.append(submission.corresponding_author)
+    authors.extend(list(submission.co_authors.all()))
+    if authors:
+        article.authors.set(authors)
+
+    return article
 

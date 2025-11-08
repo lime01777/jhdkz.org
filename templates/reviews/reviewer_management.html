@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Назначение рецензентов{% endblock %}
+
+{% block content %}
+<div class="container mt-4 reviewer-management">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">
+            <i class="bi bi-people-fill"></i> Назначение рецензентов
+        </h1>
+        <div class="btn-group">
+            <a href="{% url 'reviews:editor_dashboard' %}" class="btn btn-outline-secondary">
+                ← Назад в панель редактора
+            </a>
+            <a href="{% url 'reviews:submission_queue' %}" class="btn btn-outline-primary">
+                Очередь подач →
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="accordion" id="assignmentAccordion">
+                {% if submissions_forms %}
+                    {% for item in submissions_forms %}
+                        {% with submission=item.submission form=item.form assignments=item.assignments %}
+                        <div class="accordion-item mb-3 shadow-sm">
+                            <h2 class="accordion-header" id="heading-{{ submission.pk }}">
+                                <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#collapse-{{ submission.pk }}"
+                                        aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}"
+                                        aria-controls="collapse-{{ submission.pk }}">
+                                    <div class="w-100">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>{{ submission.submission_id }}</strong> — {{ submission.title_ru|truncatewords:12 }}
+                                            </div>
+                                            <div>
+                                                <span class="badge bg-secondary">{{ submission.get_status_display_ru }}</span>
+                                            </div>
+                                        </div>
+                                        <small class="text-muted d-block mt-1">
+                                            Автор: {{ submission.corresponding_author.get_full_name }} |
+                                            Раздел: {{ submission.section.title_ru|default:"Не указан" }}
+                                        </small>
+                                    </div>
+                                </button>
+                            </h2>
+                            <div id="collapse-{{ submission.pk }}"
+                                 class="accordion-collapse collapse {% if forloop.first %}show{% endif %}"
+                                 aria-labelledby="heading-{{ submission.pk }}"
+                                 data-bs-parent="#assignmentAccordion">
+                                <div class="accordion-body">
+                                    <div class="row g-4">
+                                        <div class="col-md-7">
+                                            <div class="card h-100">
+                                                <div class="card-header">
+                                                    <h5 class="mb-0">Назначить рецензента</h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <form method="post" class="assign-reviewer-form">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="submission_id" value="{{ submission.pk }}">
+                                                        {% crispy form %}
+                                                        <div class="text-end">
+                                                            <button type="submit" class="btn btn-primary">
+                                                                <i class="bi bi-send"></i> Назначить
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <div class="card h-100">
+                                                <div class="card-header d-flex justify-content-between align-items-center">
+                                                    <h5 class="mb-0">Назначения</h5>
+                                                    <span class="badge bg-light text-dark">{{ assignments|length }}</span>
+                                                </div>
+                                                <div class="card-body">
+                                                    {% if assignments %}
+                                                        <div class="list-group list-group-flush">
+                                                            {% for assignment in assignments %}
+                                                                <div class="list-group-item">
+                                                                    <div class="fw-semibold">{{ assignment.reviewer.get_full_name }}</div>
+                                                                    <div class="small text-muted">
+                                                                        Статус: {{ assignment.get_status_display }}
+                                                                        {% if assignment.is_overdue %}
+                                                                            <span class="badge bg-danger ms-2">Просрочено</span>
+                                                                        {% endif %}
+                                                                    </div>
+                                                                    <div class="small text-muted">
+                                                                        Дедлайн:
+                                                                        {% if assignment.review_due %}
+                                                                            {{ assignment.review_due|date:"d.m.Y H:i" }}
+                                                                        {% else %}
+                                                                            <span class="text-secondary">Не указан</span>
+                                                                        {% endif %}
+                                                                    </div>
+                                                                    {% if assignment.review %}
+                                                                        <a href="{% url 'reviews:do_review' assignment.review.pk %}"
+                                                                           class="btn btn-sm btn-outline-primary mt-2">
+                                                                            Просмотр рецензии
+                                                                        </a>
+                                                                    {% endif %}
+                                                                </div>
+                                                            {% endfor %}
+                                                        </div>
+                                                    {% else %}
+                                                        <p class="text-muted mb-0">Рецензенты ещё не назначены.</p>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endwith %}
+                    {% endfor %}
+                {% else %}
+                    <div class="alert alert-info">
+                        Нет подач, требующих назначения рецензентов.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-person-lines-fill"></i> Доступные рецензенты</h5>
+                </div>
+                <div class="card-body reviewer-list">
+                    {% if available_reviewers %}
+                        <ul class="list-group list-group-flush">
+                            {% for reviewer in available_reviewers %}
+                                <li class="list-group-item">
+                                    <div class="fw-semibold">{{ reviewer.get_full_name|default:reviewer.username }}</div>
+                                    <div class="small text-muted">{{ reviewer.email }}</div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted mb-0">Рецензенты не найдены. Добавьте пользователей с ролью «reviewer».</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="bi bi-hourglass-split"></i> Предстоящие дедлайны</h5>
+                </div>
+                <div class="card-body">
+                    {% if pending_assignments %}
+                        <ul class="list-group list-group-flush">
+                            {% for assignment in pending_assignments|slice:":5" %}
+                                <li class="list-group-item">
+                                    <strong>{{ assignment.submission.submission_id }}</strong><br>
+                                    {{ assignment.reviewer.get_full_name }}<br>
+                                    <small class="text-muted">
+                                        {% if assignment.review_due %}
+                                            Дедлайн: {{ assignment.review_due|date:"d.m.Y H:i" }}
+                                        {% else %}
+                                            Дедлайн не указан
+                                        {% endif %}
+                                    </small>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted mb-0">Ожидающих рецензий нет.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

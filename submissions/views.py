@@ -7,7 +7,12 @@ from django.db.models import Q
 from django.core.paginator import Paginator
 
 from .models import Submission, Section, SubmissionFile, SubmissionAuthor
-from .forms import SubmissionForm, SubmissionFileForm, SubmissionMetadataForm
+from .forms import (
+    SubmissionForm,
+    SubmissionFileForm,
+    SubmissionMetadataForm,
+    SubmissionAuthorForm,
+)
 
 
 class SubmissionListView(ListView):
@@ -100,16 +105,87 @@ def submission_step3(request, pk):
         corresponding_author=request.user
     )
     
-    # Логика добавления авторов будет реализована через форму
-    authors = submission.submission_authors.all()
-    
+    # Гарантируем, что в SubmissionAuthor есть запись для корреспондирующего автора
+    primary_defaults = {
+        'author_order': 1,
+        'is_corresponding': True,
+        'is_principal': True,
+        'email': submission.corresponding_author.email,
+        'affiliation': getattr(submission.corresponding_author, 'organization', ''),
+        'orcid': getattr(submission.corresponding_author, 'orcid', ''),
+    }
+    primary_author_obj, created_primary = SubmissionAuthor.objects.get_or_create(
+        submission=submission,
+        author=submission.corresponding_author,
+        defaults=primary_defaults,
+    )
+    if created_primary:
+        submission.co_authors.add(submission.corresponding_author)
+
+    # Обновляем email/данные, если пользователь изменил профиль
+    if primary_author_obj.email != submission.corresponding_author.email:
+        primary_author_obj.email = submission.corresponding_author.email
+        primary_author_obj.save(update_fields=['email'])
+
+    authors = submission.submission_authors.select_related('author').order_by('author_order')
+    initial_data = {'author_order': authors.count() + 1}
     if request.method == 'POST':
-        # Обработка добавления авторов
-        pass
-    
+        author_form = SubmissionAuthorForm(
+            request.POST,
+            submission=submission,
+        )
+    else:
+        author_form = SubmissionAuthorForm(
+            submission=submission,
+            initial=initial_data,
+        )
+
+    if request.method == 'POST':
+        # Удаление соавтора
+        delete_author_id = request.POST.get('delete_author_id')
+        if delete_author_id:
+            author_entry = get_object_or_404(
+                SubmissionAuthor,
+                pk=delete_author_id,
+                submission=submission,
+            )
+            if author_entry.author == submission.corresponding_author:
+                messages.error(request, 'Нельзя удалить корреспондирующего автора.')
+            else:
+                submission.co_authors.remove(author_entry.author)
+                author_entry.delete()
+                messages.success(request, 'Автор удалён из подачи.')
+            return redirect('submissions:step3', pk=submission.pk)
+
+        # Добавление нового соавтора
+        if author_form.is_valid():
+            submission_author = author_form.save(commit=False)
+            submission_author.submission = submission
+            submission_author.save()
+
+            # Добавляем пользователя в ManyToMany для быстрого доступа
+            submission.co_authors.add(submission_author.author)
+
+            # Если указан как корреспондирующий — обновляем основное поле
+            if submission_author.is_corresponding:
+                submission.submission_authors.exclude(pk=submission_author.pk).update(is_corresponding=False)
+                submission.corresponding_author = submission_author.author
+                submission.save(update_fields=['corresponding_author'])
+
+            # Автоматически заполняем email, если не указан
+            if not submission_author.email:
+                submission_author.email = submission_author.author.email
+                submission_author.save(update_fields=['email'])
+
+            messages.success(request, 'Соавтор успешно добавлен.')
+            return redirect('submissions:step3', pk=submission.pk)
+        else:
+            messages.error(request, 'Не удалось добавить автора. Пожалуйста, исправьте ошибки в форме.')
+
     return render(request, 'submissions/submission_step3.html', {
         'submission': submission,
         'authors': authors,
+        'form': author_form,
     })
 
 

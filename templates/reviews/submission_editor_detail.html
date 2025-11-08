@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load crispy_forms_tags %}
+{% load crispy_forms_tags status_tags %}
 
 {% block title %}Подача {{ submission.submission_id }}{% endblock %}
 
@@ -63,7 +63,7 @@
                                             <tr>
                                                 <td>{{ assignment.reviewer.get_full_name }}</td>
                                                 <td>
-                                                    <span class="badge bg-{{ assignment.status|default:'secondary' }}">
+                                                    <span class="badge bg-{{ assignment.status|assignment_status_badge }}">
                                                         {{ assignment.get_status_display }}
                                                     </span>
                                                 </td>

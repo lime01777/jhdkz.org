@@ -3,7 +3,8 @@ from django.core.exceptions import ValidationError
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Row, Column, Submit, Fieldset
 
-from .models import Submission, SubmissionFile, Section
+from .models import Submission, SubmissionFile, Section, SubmissionAuthor
+from users.models import User
 
 
 class SubmissionForm(forms.ModelForm):
@@ -175,4 +176,82 @@ class SubmissionMetadataForm(forms.ModelForm):
             ),
             Submit('submit', 'Сохранить', css_class='btn btn-primary'),
         )
+
+
+class SubmissionAuthorForm(forms.ModelForm):
+    """Форма для добавления или обновления соавтора подачи."""
+
+    author = forms.ModelChoiceField(
+        queryset=User.objects.none(),
+        label="Пользователь",
+        help_text="Выберите зарегистрированного пользователя, которого нужно добавить как соавтора.",
+        widget=forms.Select(attrs={'class': 'form-select'}),
+    )
+
+    email = forms.EmailField(
+        label="Email (для уведомления)",
+        required=False,
+        widget=forms.EmailInput(attrs={'class': 'form-control'}),
+    )
+
+    class Meta:
+        model = SubmissionAuthor
+        fields = [
+            'author',
+            'author_order',
+            'is_corresponding',
+            'is_principal',
+            'affiliation',
+            'orcid',
+            'email',
+        ]
+        widgets = {
+            'author_order': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
+            'is_corresponding': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'is_principal': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'affiliation': forms.TextInput(attrs={'class': 'form-control'}),
+            'orcid': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '0000-0000-0000-0000'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.submission = kwargs.pop('submission', None)
+        super().__init__(*args, **kwargs)
+        self.fields['author'].queryset = User.objects.filter(is_active=True).order_by('full_name', 'username')
+
+        self.helper = FormHelper()
+        self.helper.form_show_labels = True
+        self.helper.layout = Layout(
+            Fieldset(
+                'Добавить соавтора',
+                Row(
+                    Column('author', css_class='form-group col-md-6'),
+                    Column('author_order', css_class='form-group col-md-2'),
+                    Column('is_principal', css_class='form-group col-md-2 d-flex align-items-center'),
+                    Column('is_corresponding', css_class='form-group col-md-2 d-flex align-items-center'),
+                ),
+                Row(
+                    Column('email', css_class='form-group col-md-6'),
+                    Column('affiliation', css_class='form-group col-md-6'),
+                ),
+                'orcid',
+            ),
+            Submit('submit', 'Добавить автора', css_class='btn btn-primary'),
+        )
+
+    def clean_author(self):
+        author = self.cleaned_data['author']
+        if self.submission and SubmissionAuthor.objects.filter(submission=self.submission, author=author).exists():
+            raise ValidationError('Этот пользователь уже добавлен в список авторов.')
+        return author
+
+    def clean_is_corresponding(self):
+        is_corresponding = self.cleaned_data.get('is_corresponding')
+        if (
+            is_corresponding
+            and self.submission
+            and self.submission.submission_authors.filter(is_corresponding=True).exists()
+        ):
+            raise ValidationError('Корреспондирующий автор уже указан. Снимите чекбокс или обновите текущего автора.')
+        return is_corresponding
+
 
